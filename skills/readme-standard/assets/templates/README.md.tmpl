@@ -1,0 +1,188 @@
+{{BADGES}}
+
+{{NAV_LINE — include only if ≥8 sections or ≥200 lines (Rule 14):
+[Quick Start](#quick-start) • [Installation](#installation) • [Usage](#usage) • [{{Section}}](#{{slug}})
+
+}}
+
+# {{PROJECT_NAME}}
+
+{{ONE_LINE_DESCRIPTION}}
+
+> 🇹🇷 Türkçe için [README.tr.md](README.tr.md)
+
+{{VALUE_PARAGRAPH — include only if published package/product (Rule 20), ≤4 sentences:
+**{{One-sentence claim in bold.}}** {{What it does differently, who it is for — 2–3 sentences.}}
+
+}}
+
+---
+
+## Quick Start
+
+```bash
+{{INSTALL_COMMAND}}
+```
+
+```{{LANG}}
+{{MINIMAL_WORKING_EXAMPLE}}
+```
+
+{{CLOSING_LINE — e.g. "That's it — no manual registration needed."}}
+
+---
+
+## Features
+
+{{FEATURES — bullets if <7 features, 2-column table if ≥7 (Rule 19):
+
+Bullet form:
+- **{{Feature 1}}** — {{description}}
+- **{{Feature 2}}** — {{description}}
+- **{{Feature 3}}** — {{description}}
+
+Table form (≥7 features):
+| | |
+|---|---|
+| **{{Feature 1}}** | {{one-sentence description}} |
+| **{{Feature 2}}** | {{one-sentence description}} |
+}}
+
+---
+
+## Requirements
+
+- {{runtime and minimum version}}
+- {{key dependency}}
+
+---
+
+## Installation
+
+```bash
+{{PRIMARY_INSTALL_COMMAND}}
+```
+
+{{SECONDARY_INSTALL_METHODS — e.g. Package Manager Console, PackageReference, git clone. Each method gets a `**Prerequisite:**` line if it has one. Alternative paths go inside <details> (Rule 16)}}
+
+{{UNINSTALL_SUBSECTION — include only if project installs something persistent (global install, hooks, MCP config, PATH changes):
+### Uninstall
+
+```bash
+{{UNINSTALL_COMMAND}}
+```
+
+{{What is reversed and what is left behind — one or two sentences.}}
+
+}}
+
+---
+
+## Usage
+
+{{USAGE — for CLI/plugin/skill projects use assets/templates/usage-cli-command.tmpl (Rule 21; section may be named "Commands"). Otherwise:}}
+
+{{EXPLAIN_MAIN_USE_CASE}}
+
+```{{LANG}}
+{{USAGE_EXAMPLE}}
+```
+
+{{ADDITIONAL_USAGE_EXAMPLES_IF_NEEDED}}
+
+---
+
+{{CONFIGURATION_SECTION — include only if user-facing config exists:
+## Configuration
+
+| Field | Default | Description |
+|---|---|---|
+| `field` | `value` | what it does |
+
+}}
+
+{{HOW_IT_WORKS_SECTION — include only if internal mechanics are non-obvious:
+## How It Works
+
+1. Step one
+2. Step two
+3. Step three
+
+Optional ASCII architecture diagram (Rule 22) — fenced code block, no language, ≤25 lines.
+
+}}
+
+{{PROJECT_STRUCTURE_SECTION — include only for multi-component projects:
+## Project Structure
+
+```
+project/
+├── component-a/    → description
+└── component-b/    → description
+```
+
+}}
+
+{{LIMITATIONS_SECTION — include only if known user-facing constraints exist (Rule 15):
+## Limitations
+
+{{Constraint — what it is and why it exists, 1–2 sentences.}}
+
+**Workaround:** {{how the user avoids or mitigates it}}
+
+}}
+
+{{TROUBLESHOOTING_SECTION — include only if predictable failure scenarios exist (Rule 15):
+## Troubleshooting
+
+**{{Symptom — what the user sees}}** — {{one-paragraph solution, with command if applicable}}.
+
+**{{Symptom 2}}** — {{solution}}.
+
+}}
+
+{{CONTRIBUTING_SECTION — include only if contributions are accepted:
+## Contributing
+
+```bash
+git clone {{repo-url}}
+cd {{repo}}
+{{dev-setup-command}}
+```
+
+{{PR process — one or two sentences, link CONTRIBUTING.md if it exists.}}
+
+}}
+
+{{COMMUNITY_SECTION — include only if community channels exist:
+## Community
+
+- [{{Channel name}}]({{url}})
+- [Issues]({{repo-url}}/issues)
+
+}}
+
+{{DOCUMENTATION_SECTION — include only if external docs site exists:
+## Documentation
+
+Full documentation: **[{{docs-url}}]({{docs-url}})**
+
+| Section | What's Covered |
+|---|---|
+| [{{Page}}]({{url}}) | {{what it covers}} |
+
+}}
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+{{FOOTER — include only if GitHub repo and README ≥200 lines (Rule 23):
+---
+
+<div align="center">
+
+[Report Bug](https://github.com/{{username}}/{{repo}}/issues) · [Request Feature](https://github.com/{{username}}/{{repo}}/issues)
+
+</div>
+}}

@@ -1,0 +1,51 @@
+## {{Usage or Commands — "Commands" allowed only for CLI/plugin projects (Rule 11 alias)}}
+
+{{CHEAT_SHEET — mandatory opener: every command in ONE code block, end-of-line comments aligned:}}
+
+```bash
+{{tool}} {{command-1}}        # {{what it does, 3–6 words}}
+{{tool}} {{command-2}}        # {{what it does}}
+{{tool}} {{command-3}}        # {{what it does}}
+{{tool}} --help               # {{Show all commands}}
+```
+
+{{PER_COMMAND_SUBSECTIONS — only for commands that need explanation beyond the cheat sheet. Repeat this block per command:}}
+
+### `{{tool command-1}}`
+
+{{One line — what it does.}}
+
+**What it does:**
+1. {{step}}
+2. {{step}}
+3. {{step}}
+
+**Usage:**
+```bash
+{{tool}} {{command-1}} {{[options]}}
+```
+
+**Example:**
+```bash
+{{tool}} {{command-1}}
+# {{Narrated outcome comments — what the tool will do, e.g.:}}
+# - {{analyzes current state}}
+# - {{performs the action}}
+# - {{reports the result}}
+```
+
+{{OPTIONS_TABLE — only if the command has flags:
+| Option | Description | Default |
+|---|---|---|
+| `--{{flag}}` | {{what it does}} | `{{default}}` |
+}}
+
+{{REQUIREMENTS_LINE — only if the command needs external tools/auth:
+**Requirements:** {{e.g. GitHub CLI (`gh`) installed and authenticated}}
+}}
+
+{{WHEN_TO_USE — optional, 2–3 bullets:
+**When to use:**
+- {{scenario}}
+- {{scenario}}
+}}

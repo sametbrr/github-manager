@@ -1,0 +1,184 @@
+{{BADGES — identical to README.md}}
+
+{{NAV_LINE — only if present in README.md; anchors use Turkish slugs (Rule 14):
+[Hızlı Başlangıç](#hızlı-başlangıç) • [Kurulum](#kurulum) • [Kullanım](#kullanım) • [{{Bölüm}}](#{{slug}})
+
+}}
+
+# {{PROJECT_NAME}}
+
+{{TEK_SATIR_ACIKLAMA}}
+
+> 🇬🇧 For English see [README.md](README.md)
+
+{{DEĞER_PARAGRAFI — yalnızca README.md'de varsa (Rule 20), Türkçe çevirisi:
+**{{Tek cümlelik iddia, kalın.}}** {{2–3 cümle devam.}}
+
+}}
+
+---
+
+## Hızlı Başlangıç
+
+```bash
+{{INSTALL_COMMAND — unchanged}}
+```
+
+```{{LANG}}
+{{MINIMAL_WORKING_EXAMPLE — unchanged}}
+```
+
+{{KAPANIŞ_SATIRI — e.g. "Hepsi bu kadar — manuel kayıt gerekmez."}}
+
+---
+
+## Özellikler
+
+{{ÖZELLİKLER — README.md ile aynı biçim (bullet veya tablo, Rule 19):
+
+Bullet biçimi:
+- **{{Özellik 1}}** — {{açıklama}}
+- **{{Özellik 2}}** — {{açıklama}}
+
+Tablo biçimi (≥7 özellik):
+| | |
+|---|---|
+| **{{Özellik 1}}** | {{tek cümle açıklama}} |
+}}
+
+---
+
+## Gereksinimler
+
+- {{runtime ve minimum sürüm}}
+- {{temel bağımlılık}}
+
+---
+
+## Kurulum
+
+```bash
+{{PRIMARY_INSTALL_COMMAND — unchanged}}
+```
+
+{{İKİNCİL_KURULUM_YÖNTEMLERİ — her yöntemin **Ön koşul:** satırı varsa çevrilir; <details> içindeki <summary> metni çevrilir (Rule 16)}}
+
+{{KALDIRMA_ALT_BÖLÜMÜ — yalnızca README.md'de varsa:
+### Kaldırma
+
+```bash
+{{UNINSTALL_COMMAND — unchanged}}
+```
+
+{{Neyin geri alındığı, neyin kaldığı — 1–2 cümle.}}
+
+}}
+
+---
+
+## Kullanım
+
+{{KULLANIM — CLI/eklenti projelerinde README.md'deki komut şablonunun TR aynası (bölüm adı "Komutlar" olabilir, Rule 21; etiketler: **Ne yapar:** / **Kullanım:** / **Örnek:**). Aksi halde:}}
+
+{{ANA_KULLANIM_SENARYOSU}}
+
+```{{LANG}}
+{{USAGE_EXAMPLE — unchanged}}
+```
+
+{{EK_KULLANIM_ÖRNEKLERİ}}
+
+---
+
+{{YAPILANDIRMA_BÖLÜMÜ — yalnızca README.md'de varsa:
+## Yapılandırma
+
+| Alan | Varsayılan | Açıklama |
+|---|---|---|
+| `alan` | `değer` | ne yapar |
+
+}}
+
+{{NASIL_ÇALIŞIR_BÖLÜMÜ — yalnızca README.md'de varsa:
+## Nasıl Çalışır
+
+1. Birinci adım
+2. İkinci adım
+3. Üçüncü adım
+
+ASCII diyagram varsa aynen kopyalanır — çevrilmez (Rule 6).
+
+}}
+
+{{PROJE_YAPISI_BÖLÜMÜ — yalnızca README.md'de varsa:
+## Proje Yapısı
+
+```
+proje/
+├── bileşen-a/    → açıklama
+└── bileşen-b/    → açıklama
+```
+
+}}
+
+{{SINIRLAMALAR_BÖLÜMÜ — yalnızca README.md'de varsa (Rule 15):
+## Sınırlamalar
+
+{{Kısıt — ne olduğu ve neden var olduğu, 1–2 cümle.}}
+
+**Geçici çözüm:** {{kullanıcı nasıl aşar}}
+
+}}
+
+{{SORUN_GİDERME_BÖLÜMÜ — yalnızca README.md'de varsa (Rule 15):
+## Sorun Giderme
+
+**{{Belirti — kullanıcının gördüğü}}** — {{tek paragraf çözüm, gerekirse komutla}}.
+
+}}
+
+{{KATKIDA_BULUNMA_BÖLÜMÜ — yalnızca README.md'de varsa:
+## Katkıda Bulunma
+
+```bash
+git clone {{repo-url}}
+cd {{repo}}
+{{dev-setup-command}}
+```
+
+{{PR süreci — 1–2 cümle.}}
+
+}}
+
+{{TOPLULUK_BÖLÜMÜ — yalnızca README.md'de varsa:
+## Topluluk
+
+- [{{Kanal adı}}]({{url}})
+- [Issues]({{repo-url}}/issues)
+
+}}
+
+{{DOKÜMANTASYON_BÖLÜMÜ — yalnızca README.md'de varsa:
+## Dokümantasyon
+
+Tüm dokümantasyon: **[{{docs-url}}]({{docs-url}})**
+
+| Bölüm | Ne Kapsıyor |
+|---|---|
+| [{{Sayfa}}]({{url}}) | {{ne kapsıyor}} |
+
+}}
+
+## Lisans
+
+MIT — bkz. [LICENSE](LICENSE).
+
+{{FOOTER — yalnızca README.md'de varsa (Rule 23), linkler aynı:
+---
+
+<div align="center">
+
+[Hata Bildir](https://github.com/{{username}}/{{repo}}/issues) · [Özellik İste](https://github.com/{{username}}/{{repo}}/issues)
+
+</div>
+}}
