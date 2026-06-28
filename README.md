@@ -19,6 +19,7 @@ can't infer, proposing where it can. Works on the **whole account** or a **singl
 - `profile-readme` — generate/maintain the `<login>/<login>` profile README + Turkish mirror
 - `gh-normalize` — fill and standardize repo descriptions and topics (single repo or batch)
 - `readme-standard` — enforce a consistent README.md + README.tr.md structure
+- `release-workflow` — install a project-type-aware auto-release GitHub Actions workflow (single local repo)
 
 **Agents** (read-only analyzers): `account-analyzer`, `description-analyzer`, `tag-analyzer`, `readme-analyzer`
 

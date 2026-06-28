@@ -19,6 +19,7 @@ standart-dışı olanı raporlar ve interaktif düzeltir — infer edemediğini 
 - `profile-readme` — `<login>/<login>` profil README + Türkçe mirror üret/güncelle
 - `gh-normalize` — repo açıklama ve topics'lerini doldur/standartla (tek repo veya batch)
 - `readme-standard` — tutarlı README.md + README.tr.md yapısını uygula
+- `release-workflow` — proje-tipi duyarlı otomatik-release GitHub Actions workflow'u kur (tek yerel repo)
 
 **Agent'lar** (read-only analiz): `account-analyzer`, `description-analyzer`, `tag-analyzer`, `readme-analyzer`
 
