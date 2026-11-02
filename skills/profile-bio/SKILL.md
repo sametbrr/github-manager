@@ -3,7 +3,7 @@ name: profile-bio
 description: Fills in GitHub account profile fields (name, bio, company, location, blog, social accounts) through the GitHub API, asking for every missing value instead of inventing one and confirming before any write. Use when the user wants to complete or update their GitHub profile details.
 disable-model-invocation: true
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # profile-bio

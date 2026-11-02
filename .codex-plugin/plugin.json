@@ -1,6 +1,6 @@
 {
   "name": "github-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Audit and strengthen any GitHub account: profile fields, profile README, repo descriptions, topics, license, project READMEs and release workflows. Read-only audit first, every write confirmed.",
   "author": { "name": "sametbrr", "email": "sametbrr@gmail.com", "url": "https://github.com/sametbrr" },
   "homepage": "https://github.com/sametbrr/github-manager",

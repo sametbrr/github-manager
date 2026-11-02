@@ -144,7 +144,7 @@ URLs stay identical; only the link text is translated.
 
 ## `<details>` blocks (Rule 16)
 
-Translate only the `<summary>` text; everything inside follows the normal rules (code blocks unchanged, prose translated):
+Translate only the `<summary>` text; everything inside follows the normal rules (code blocks unchanged except comments, prose translated):
 
 | English | Turkish |
 |---|---|
@@ -201,11 +201,11 @@ For `.txt` extension: `MIT — bkz. [LICENSE.txt](LICENSE.txt).`
 ## Hızlı Başlangıç
 
 ```bash
-{{install-command — unchanged}}
+{{install-command — unchanged; comments translated}}
 ```
 
 ```{{lang}}
-{{code example — unchanged}}
+{{code example — unchanged; comments translated}}
 ```
 
 {{one-line closing in Turkish — e.g., "Hepsi bu kadar — manuel kayıt gerekmez."}}
@@ -224,4 +224,4 @@ For `.txt` extension: `MIT — bkz. [LICENSE.txt](LICENSE.txt).`
 4. Use modern technical Turkish developers understand naturally. Avoid archaic formal phrasing.
 5. "Optional" → "opsiyonel" (not "isteğe bağlı") for technical config fields; either is fine in prose.
 6. Passive voice is natural in Turkish tech docs: "kaydedilir", "oluşturulur", "yüklenir".
-7. ASCII architecture diagrams are code blocks (Rule 6) — never translated, copied verbatim.
+7. ASCII architecture diagrams and directory trees are code blocks (Rule 6) — copied verbatim; only `#`/`//` comments in them are translated.

@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.1] - 2026-11-02
+
+### Changed
+- readme-standard Rule 6: in translated mirrors, comments inside code blocks may and should be
+  translated; commands, flags, paths, placeholders, prompts and trigger phrases, directory trees and
+  sample output stay byte-identical to README.md.
+- readme-standard Rule 21: for agent skills and plugins, a code block of example trigger phrases and
+  slash or `$skill` invocations is the Usage cheat sheet; mirrors never translate these inputs. The
+  Usage template shows this form.
+- Badges: a repo that is both a publishable npm, NuGet or PyPI package and an agent plugin is
+  detected as the package; registry badges come first and the agentskills.io badge is optional.
+- README.md and README.tr.md: nav line, a trigger cheat sheet at the top of Usage, a Troubleshooting
+  section for `gh` auth and scopes, and Turkish code blocks that match the English ones except for
+  comments.
+- skills/readme-standard README.md and README.tr.md: GitHub release badge, trigger cheat sheet,
+  English trigger phrases in the Turkish mirror, and a Configuration section for the `readme.*` keys.
+
 ## [1.0.0] - 2026-11-02
 
 First versioned release. github-manager is now a generic tool for any GitHub user and runs as a

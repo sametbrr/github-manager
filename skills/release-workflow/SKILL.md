@@ -3,7 +3,7 @@ name: release-workflow
 description: Installs a project-type-aware GitHub Actions release workflow (.github/workflows/release.yml) into a local repo. Detects npm, MCP server, NuGet, Python, Go (plain, GoReleaser or with an npm wrapper), agent plugin, single skill and VERSION-file projects plus the default branch, then tags, publishes to the registry and creates a GitHub release. Use when the user wants automated releases or publishing for a repo. Never commits.
 disable-model-invocation: true
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # release-workflow

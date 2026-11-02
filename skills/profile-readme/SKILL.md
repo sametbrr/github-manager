@@ -3,7 +3,7 @@ name: profile-readme
 description: Creates or updates the GitHub profile README (the login/login repo) from live account data, with configurable sections and optional translated mirrors. Detects generated profile READMEs and edits their source and runs the generator instead of the output. Use when the user wants a new or refreshed GitHub profile README.
 disable-model-invocation: true
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # profile-readme

@@ -1,3 +1,4 @@
+[![GitHub release](https://img.shields.io/github/v/release/sametbrr/github-manager?display_name=tag&sort=semver)](https://github.com/sametbrr/github-manager/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
@@ -16,7 +17,7 @@ claude plugin marketplace add sametbrr/skill-hub
 claude plugin install github-manager@skill-hub
 ```
 
-```
+```text
 > "audit readme"      # rule-by-rule checklist, writes nothing
 > "create readme"     # README.md from project metadata (+ configured mirrors)
 ```
@@ -60,6 +61,15 @@ codex plugin add github-manager@skill-hub
 
 ## Usage
 
+```text
+> "audit readme"           # rule-by-rule checklist, writes nothing
+> "create readme"          # README.md + configured mirrors from project metadata
+> "fix readme"             # rewrite README(s) to the standard after confirmation
+> "sync mirrors"           # regenerate mirrors from the current README.md
+> "readme kontrol et"      # Turkish trigger, same as "audit readme"
+/github-manager:readme-standard   # explicit invocation (Codex: $readme-standard)
+```
+
 | Mode | Trigger examples | What happens |
 |---|---|---|
 | **Create** | "create readme", "readme oluştur" | Generates README.md (and each configured mirror) from templates and detected metadata |
@@ -67,7 +77,20 @@ codex plugin add github-manager@skill-hub
 | **Fix** | "fix readme", "readme düzelt" | Rewrites existing README(s) to match the standard after confirmation |
 | **Mirror Sync** | "sync mirrors", "tr readme güncelle" | Regenerates mirrors only, from the current README.md |
 
-Mirrors and badges are set in `~/.agents/github-manager/config.json` (`readme.mirrors`, `readme.badges`, `readme.extraSections`); see [SKILL.md](SKILL.md). Full rules: [references/rules.md](references/rules.md).
+Full rules: [references/rules.md](references/rules.md). Badge patterns: [references/badge-patterns.md](references/badge-patterns.md).
+
+---
+
+## Configuration
+
+Optional, in `~/.agents/github-manager/config.json` (or `$GITHUB_MANAGER_HOME/config.json`):
+
+| Key | Default | Effect |
+|---|---|---|
+| `language` | `"en"` | language of README.md |
+| `readme.mirrors` | `[]` | language codes; each gets a full translation `README.<code>.md` |
+| `readme.badges` | `"auto"` | `auto`, `minimal` or `none` |
+| `readme.extraSections` | `[]` | project-specific sections, placed after Troubleshooting and before Contributing |
 
 ---
 

@@ -3,7 +3,7 @@ name: gh-normalize
 description: Fills in and standardizes GitHub repo descriptions and topics for one repo or a whole scope (public, private or all), with a current-to-proposed diff and confirmation per repo. Use when the user wants to fix, fill or clean up repo descriptions or topics after an audit.
 disable-model-invocation: true
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # gh-normalize

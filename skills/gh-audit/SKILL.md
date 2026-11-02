@@ -2,7 +2,7 @@
 name: gh-audit
 description: Produces a read-only health report for a GitHub account or a single repo, covering profile fields, profile README, repo descriptions, topics, license and README structure, across a chosen scope (public, private or all). Writes nothing. Use when the user asks to audit, review or check their GitHub profile or repos, or wants to know what to improve before fixing anything.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # gh-audit

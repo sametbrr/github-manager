@@ -1,3 +1,4 @@
+[![GitHub release](https://img.shields.io/github/v/release/sametbrr/github-manager?display_name=tag&sort=semver)](https://github.com/sametbrr/github-manager/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
@@ -16,9 +17,9 @@ claude plugin marketplace add sametbrr/skill-hub
 claude plugin install github-manager@skill-hub
 ```
 
-```
-> "readme kontrol et"   # kural kural kontrol listesi, hiçbir dosya yazmaz
-> "readme oluştur"      # proje metadata'sından README.md (+ yapılandırılmış çeviriler)
+```text
+> "audit readme"      # kural kural kontrol listesi, hiçbir dosya yazmaz
+> "create readme"     # proje metadata'sından README.md (+ yapılandırılmış çeviriler)
 ```
 
 Bu skill [github-manager](../../README.tr.md) plugin'inin içinde gelir. Ayrı reposu artık asıl kaynak değildir.
@@ -60,6 +61,15 @@ codex plugin add github-manager@skill-hub
 
 ## Kullanım
 
+```text
+> "audit readme"           # kural kural kontrol listesi, hiçbir dosya yazmaz
+> "create readme"          # proje metadata'sından README.md + yapılandırılmış çeviriler
+> "fix readme"             # onaydan sonra README'leri standarda göre yeniden yaz
+> "sync mirrors"           # çevirileri mevcut README.md'den yeniden üret
+> "readme kontrol et"      # Türkçe tetikleyici, "audit readme" ile aynı
+/github-manager:readme-standard   # açık çağrı (Codex: $readme-standard)
+```
+
 | Mod | Tetikleyici örnekleri | Ne olur |
 |---|---|---|
 | **Oluştur** | "create readme", "readme oluştur" | Şablonlardan ve tespit edilen metadata'dan README.md'yi (ve her yapılandırılmış çeviriyi) üretir |
@@ -67,7 +77,20 @@ codex plugin add github-manager@skill-hub
 | **Düzelt** | "fix readme", "readme düzelt" | Onaydan sonra mevcut README'leri standarda göre yeniden yazar |
 | **Çeviri Senkronu** | "sync mirrors", "tr readme güncelle" | Yalnızca çevirileri mevcut README.md'den yeniden üretir |
 
-Çeviriler ve badge'ler `~/.agents/github-manager/config.json` içinde ayarlanır (`readme.mirrors`, `readme.badges`, `readme.extraSections`); bkz. [SKILL.md](SKILL.md). Tüm kurallar: [references/rules.md](references/rules.md).
+Tüm kurallar: [references/rules.md](references/rules.md). Badge desenleri: [references/badge-patterns.md](references/badge-patterns.md).
+
+---
+
+## Yapılandırma
+
+İsteğe bağlı; `~/.agents/github-manager/config.json` (veya `$GITHUB_MANAGER_HOME/config.json`) içinde:
+
+| Anahtar | Varsayılan | Etkisi |
+|---|---|---|
+| `language` | `"en"` | README.md'nin dili |
+| `readme.mirrors` | `[]` | dil kodları; her biri için tam çeviri `README.<kod>.md` üretilir |
+| `readme.badges` | `"auto"` | `auto`, `minimal` veya `none` |
+| `readme.extraSections` | `[]` | projeye özel bölümler; Sorun Giderme'den sonra, Katkıda Bulunma'dan önce yer alır |
 
 ---
 

@@ -2,7 +2,7 @@
 name: readme-standard
 description: Creates, audits and fixes project READMEs against one consistent structure (Quick Start, Features, Requirements, Installation, Usage, License plus conditional sections), with badges detected from package.json, csproj, pyproject.toml, go.mod, plugin manifests or SKILL.md, and optional full translations such as README.tr.md. Use when the user asks to create, check, audit, fix, standardize or translate a README, for example "create readme", "audit readme", "fix readme", "sync mirrors", "readme oluştur", "readme kontrol et", "readme düzelt", "tr readme güncelle". Not for the login/login GitHub profile README (use profile-readme) or account-wide repo audits (use gh-audit). Audit mode writes nothing; other modes write only after the user confirms the file list.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # readme-standard
@@ -79,7 +79,7 @@ translation of README.md:
 - Back link right after the translated description (Rule 5), e.g. `> 🇬🇧 For English see [README.md](README.md)`
 - All prose and section headings translated; for Turkish use [references/tr-translations.md](references/tr-translations.md), for other languages translate consistently
 - Badges: identical (same shields.io URLs)
-- Code blocks: never translated
+- Code blocks: identical to README.md except comments, which are translated (Rule 6)
 - Same section set and order as README.md
 
 ## Conditional sections
@@ -170,7 +170,7 @@ Read these files in order (first match wins):
 
 | File | Project type | Extract |
 |---|---|---|
-| `.claude-plugin/plugin.json` or `.codex-plugin/plugin.json` | Agent plugin | `name`, `description`, `version`; list `skills/*/SKILL.md` for Usage |
+| `.claude-plugin/plugin.json` or `.codex-plugin/plugin.json` | Agent plugin (unless a publishable package manifest also exists, see below) | `name`, `description`, `version`; list `skills/*/SKILL.md` for Usage |
 | `package.json` with `@modelcontextprotocol/sdk` dependency, or `server.json` | MCP server (npm) | `name`, `description`, `version`, `bin`; list tools for an `## MCP Tools` section |
 | `package.json` + `next.config.*` / `vite.config.*` / `astro.config.*` | Web app / site | `name`, scripts (`dev`, `build`); usually `"private": true`, no registry badge |
 | `package.json` | npm package | `name`, `description`, `version`, `repository.url`, `bin` |
@@ -179,6 +179,12 @@ Read these files in order (first match wins):
 | `pyproject.toml` | Python package | `[project] name`, `version`, `description`; MCP server if it depends on `mcp` |
 | `SKILL.md` (root or single `skills/<name>/`) | Agent skill | `name`, `description` frontmatter fields |
 | No match | Generic/library | directory name + git remote |
+
+**Package + plugin hybrids.** When the repo is a publishable npm, NuGet or PyPI package (a
+`package.json` without `"private": true`, a packable `*.csproj`, or a `pyproject.toml` with a
+version) **and** also ships an agent plugin or skill layer, the package type wins: detect it as the
+package, put its registry badges first, and treat the plugin as a feature (mention it in Features
+and Usage). The agentskills.io badge is optional there, placed after the package badges.
 
 A private app (private repo, no publishable manifest) still gets the core sections; Installation
 then means local setup (clone, env vars, run).
@@ -207,6 +213,7 @@ Exact markdown for each type: [references/badge-patterns.md](references/badge-pa
 | Python package | PyPI version + Python versions + license |
 | Go module / CLI | Go Reference + GitHub release + license |
 | Agent plugin / agent skill | GitHub release + license + agentskills.io (no host-specific badge) |
+| Package that also ships a plugin | the package's registry badges first + license; agentskills.io optional, last |
 | CLI tool (not an agent skill) | GitHub release + license (+ registry badge if published) |
 | Web app / private app | license only (or none with `readme.badges: none`) |
 | Generic | GitHub release + license |
@@ -220,7 +227,7 @@ Full rules with correct/wrong examples: [references/rules.md](references/rules.m
 3. Quick Start: install command + minimal working example, ≤15 lines total
 4. (mirrors) One mirror link line in README.md after the description, e.g. `> 🇹🇷 Türkçe için [README.tr.md](README.tr.md)`
 5. (mirrors) Back link in each mirror, e.g. `> 🇬🇧 For English see [README.md](README.md)`
-6. Code blocks: never translated
+6. (mirrors) Code blocks stay identical — commands, paths, prompts, trees, output — only comments are translated
 7. Tables: monolingual, one language per file
 8. Section heading emojis: only if the project already uses them consistently
 9. License section: always last `##` section — `<SPDX id> — see [LICENSE](LICENSE).`

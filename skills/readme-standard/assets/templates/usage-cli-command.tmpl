@@ -9,6 +9,20 @@
 {{tool}} --help               # {{Show all commands}}
 ```
 
+{{AGENT_SKILL_OR_PLUGIN_FORM — for skills/plugins triggered by natural language, the cheat sheet is
+one block of example trigger phrases and slash or $skill invocations. These are inputs: mirrors keep
+them byte-identical and translate only the comments (Rule 6, Rule 21):
+
+```text
+/{{plugin}}:{{skill-1}}           # {{what it does, 3–6 words}}
+/{{plugin}}:{{skill-2}} --{{flag}}  # {{what it does}}
+> "{{trigger phrase 1}}"          # {{what happens}}
+> "{{trigger phrase 2}}"          # {{what happens}}
+```
+
+Per-skill `###` subsections follow the same block structure below, with the skill name as heading.
+}}
+
 {{PER_COMMAND_SUBSECTIONS — only for commands that need explanation beyond the cheat sheet. Repeat this block per command:}}
 
 ### `{{tool command-1}}`

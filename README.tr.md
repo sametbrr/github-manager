@@ -2,6 +2,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
+[Hızlı Başlangıç](#hızlı-başlangıç) • [Kurulum](#kurulum) • [Kullanım](#kullanım) • [Yapılandırma](#yapılandırma) • [Sorun Giderme](#sorun-giderme)
+
 # github-manager
 
 Herhangi bir GitHub hesabını denetler ve güçlendirir: profil alanları, profil README'si, repo açıklamaları, topic'ler, lisans, proje README'leri ve release workflow'ları. Önce salt okuma denetim, her yazma onaylı.
@@ -18,7 +20,7 @@ claude plugin install github-manager@skill-hub
 ```
 
 ```
-> public GitHub repolarımı denetle
+> audit my public GitHub repos
 ```
 
 Eksik veya standart altı olanların salt okuma raporunu alırsınız; ardından `gh-onboard` bunları aşama aşama düzeltir.
@@ -65,6 +67,19 @@ Manuel kurulum, tek tek skill klasörlerini değil plugin yapısının tamamın�
 ---
 
 ## Kullanım
+
+```text
+/github-manager:gh-audit --scope public            # salt okuma rapor, hiçbir şey yazmaz
+/github-manager:gh-onboard --scope public          # rehberli oturum: denetim, ardından aşama aşama düzeltme
+/github-manager:gh-normalize --repo owner/name     # tek reponun açıklamasını ve topic'lerini düzelt
+/github-manager:profile-bio                        # hesap alanlarını doldur
+/github-manager:profile-readme                     # profil README'sini oluştur veya yenile
+/github-manager:release-workflow                   # bulunduğun repoya release.yml ekle
+> "audit the README in this repo"                  # readme-standard, denetim modu
+> "fix readme"                                     # readme-standard, düzeltme modu
+```
+
+Codex'te aynı skill'leri `$gh-audit`, `$gh-onboard` vb. ile çağırın.
 
 | Skill | Ne yapar | Yazar |
 |---|---|---|
@@ -122,18 +137,28 @@ Tam başvuru: [skills/gh-audit/references/config.md](skills/gh-audit/references/
 
 ```
 github-manager/
-├── .claude-plugin/plugin.json   → Claude Code manifesti (sürümün tek kaynağı)
-├── .codex-plugin/plugin.json    → Codex manifesti
-├── agents/                      → salt okuma analiz alt ajanları
+├── .claude-plugin/plugin.json   → Claude Code manifest (version source of truth)
+├── .codex-plugin/plugin.json    → Codex manifest
+├── agents/                      → read-only analyzer subagents
 └── skills/
-    ├── gh-audit/                → denetim + config ve lisans başvuruları
-    ├── gh-normalize/            → açıklama ve topic standartları
+    ├── gh-audit/                → audit + config and license references
+    ├── gh-normalize/            → description and topic standards
     ├── gh-onboard/
-    ├── profile-bio/             → profil alanları standardı
-    ├── profile-readme/          → profil README standardı
-    ├── readme-standard/         → README kuralları, şablonlar, Türkçe tablo
-    └── release-workflow/        → release şablonları + add-release-workflow.sh
+    ├── profile-bio/             → profile fields standard
+    ├── profile-readme/          → profile README standard
+    ├── readme-standard/         → README rules, templates, Turkish table
+    └── release-workflow/        → release templates + add-release-workflow.sh
 ```
+
+---
+
+## Sorun Giderme
+
+**`gh: command not found` veya "not logged in"** — [GitHub CLI](https://cli.github.com)'ı kurun, ardından `gh auth login -s repo,read:org,user` çalıştırın.
+
+**Denetimde private repolar veya sosyal hesaplar görünmüyor** — token'da yetki (scope) eksik. `gh auth status` ile kontrol edin, `gh auth refresh -s repo,read:org,user` ile ekleyin.
+
+**`profile-bio`, `PATCH /user` çağrısında HTTP 404 veya 403 ile duruyor** — `user` yetkisi eksik: `gh auth refresh -s user`.
 
 ---
 

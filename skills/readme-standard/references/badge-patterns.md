@@ -89,6 +89,16 @@ No separate "MCP" badge unless the server is listed in the official MCP Registry
 Only for repos that ship a `SKILL.md` or a plugin manifest. A plain CLI tool uses the Generic
 block (plus its registry badge if published); it never gets the agentskills.io badge.
 
+**Hybrid repos.** If the repo is also a publishable npm, NuGet or PyPI package (for example an npm
+CLI that ships a plugin layer), use that package's block instead: registry badge first, then
+license. The agentskills.io badge is optional and, if used, goes last:
+
+```markdown
+[![npm version](https://badge.fury.io/js/{package-name}.svg)](https://badge.fury.io/js/{package-name})
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
+```
+
 ```markdown
 [![GitHub release](https://img.shields.io/github/v/release/{username}/{repo}?display_name=tag&sort=semver)](https://github.com/{username}/{repo}/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

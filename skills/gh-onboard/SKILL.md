@@ -3,7 +3,7 @@ name: gh-onboard
 description: Guides a GitHub account from audit to fixes end to end, interactively and stage by stage, covering profile fields, profile README, repo descriptions and topics, project READMEs and release workflows, with every write confirmed. Use when the user wants to set up, clean up or strengthen their whole GitHub presence in one guided session.
 disable-model-invocation: true
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # gh-onboard

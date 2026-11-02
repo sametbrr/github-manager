@@ -2,6 +2,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
+[Quick Start](#quick-start) • [Installation](#installation) • [Usage](#usage) • [Configuration](#configuration) • [Troubleshooting](#troubleshooting)
+
 # github-manager
 
 Audit and strengthen any GitHub account: profile fields, profile README, repo descriptions, topics, license, project READMEs and release workflows. Read-only audit first, every write confirmed.
@@ -65,6 +67,19 @@ Manual install means copying the whole plugin layout, not single skill folders: 
 ---
 
 ## Usage
+
+```text
+/github-manager:gh-audit --scope public            # read-only report, writes nothing
+/github-manager:gh-onboard --scope public          # guided session: audit, then fix stage by stage
+/github-manager:gh-normalize --repo owner/name     # fix one repo's description and topics
+/github-manager:profile-bio                        # fill account fields
+/github-manager:profile-readme                     # create or refresh the profile README
+/github-manager:release-workflow                   # add release.yml to the current repo
+> "audit the README in this repo"                  # readme-standard, audit mode
+> "fix readme"                                     # readme-standard, fix mode
+```
+
+In Codex, invoke the same skills with `$gh-audit`, `$gh-onboard` and so on.
 
 | Skill | What it does | Writes |
 |---|---|---|
@@ -134,6 +149,16 @@ github-manager/
     ├── readme-standard/         → README rules, templates, Turkish table
     └── release-workflow/        → release templates + add-release-workflow.sh
 ```
+
+---
+
+## Troubleshooting
+
+**`gh: command not found` or "not logged in"** — install the [GitHub CLI](https://cli.github.com), then run `gh auth login -s repo,read:org,user`.
+
+**Private repos or social accounts are missing from the audit** — the token lacks scopes. Check with `gh auth status` and add them with `gh auth refresh -s repo,read:org,user`.
+
+**`profile-bio` fails with HTTP 404 or 403 on `PATCH /user`** — the `user` scope is missing: `gh auth refresh -s user`.
 
 ---
 

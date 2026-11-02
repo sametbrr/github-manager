@@ -118,23 +118,32 @@ README. Use the table's "link back" line or the generic `> 🌐 [English](README
 
 ---
 
-## Rule 6 — Code blocks are never translated
+## Rule 6 — Code blocks: only comments are translated (mirrors)
 
-Code, shell commands, JSON, XML, YAML stay identical in the primary README and every mirror.
-
-❌ Wrong in README.tr.md:
-```csharp
-// Widget'ı oluştur ve sayfaya bağla
-const bilesen = widget.olustur("#uygulama");
-```
+In a mirror, a code block keeps everything that a reader copies or compares byte-identical to the
+primary README: commands, flags, paths, placeholders (`<repo-dir>`, `{{name}}`), code, JSON/YAML
+keys and values, prompts and trigger phrases, slash invocations, directory trees and sample output.
+Only comments (`# ...`, `// ...`, `-- ...`, `<!-- ... -->`) may be translated, and they **should**
+be, so the mirror reads in one language.
 
 ✅ Correct in README.tr.md:
-```csharp
-// Create the widget and mount it
-const widget = widget.create("#app");
+```bash
+npm install acme-widget        # paketi kur
+acme-widget init --dir ./app   # yapılandırma dosyasını oluştur
 ```
 
-Note: inline comments inside code are debatable — keep them identical to the primary README unless the user explicitly prefers translated comments.
+❌ Wrong in README.tr.md (command, flag and path translated):
+```bash
+npm kur acme-widget            # paketi kur
+acme-widget baslat --dizin ./uygulama
+```
+
+❌ Wrong in README.tr.md (prompt translated; the agent is triggered by the English phrase shown
+in README.md, and both files must show the same input):
+```
+> README'yi denetle
+```
+✅ Correct: `> audit readme` stays as is; a translated comment may follow it.
 
 ---
 
@@ -531,6 +540,23 @@ and get keyboard support, screen-reader labels and theming out of the box.
 
 For CLI / plugin / skill projects, Usage (or its approved alias `Commands`) opens with a single cheat-sheet code block (every command, end-of-line comments), followed by `###` subsections only for commands needing explanation. Full template: [../assets/templates/usage-cli-command.tmpl](../assets/templates/usage-cli-command.tmpl)
 
+**Agent skills and plugins** that are triggered by natural language or slash commands use the same
+rule with their own "commands": the cheat sheet is one code block of example trigger phrases and
+slash or `$skill` invocations, one per line, with a short end-of-line comment. These are inputs,
+so mirrors never translate them (Rule 6); only the comments are translated.
+
+✅ Correct (agent plugin):
+````markdown
+## Usage
+
+```text
+/acme-docs:audit              # read-only check, writes nothing
+/acme-docs:fix --dry-run      # preview fixes
+> "audit the docs in this repo"
+> "fix the changelog"
+```
+````
+
 Cheat-sheet conventions:
 
 - **Order:** workflow order, not alphabetical — setup commands first, daily-use
@@ -616,7 +642,7 @@ README.md
   ❌ Rule 2: Quick Start is not the first section (found: Features → Quick Start)
   ✅ Rule 3: Quick Start is ≤15 lines and copy-paste ready
   ✅ Rule 4: Mirror link line present and correctly formatted (mirrors: tr)
-  ✅ Rule 6: Code blocks not translated
+  ✅ Rule 6: Code blocks identical to README.md except translated comments
   ⚠️ Rule 7: Table in "Configuration" section has bilingual columns
   ✅ Rule 8: Section heading emojis consistent (none)
   ✅ Rule 9: License section is last

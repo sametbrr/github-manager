@@ -24,7 +24,7 @@ real data for it; never leave a placeholder.
 ## Rules
 
 1. Primary file in `language` (default English). Each code in `profile.mirrors` gets a full
-   translation `README.<lang>.md` with the same sections, same badges and untranslated code.
+   translation `README.<lang>.md` with the same sections, same badges and code blocks that are identical except for translated comments.
    Link the mirrors from the primary file right after the intro block.
 2. Project lists use the canonical repo descriptions (after `gh-normalize`), not invented text.
 3. Keep hand-written sections the user added, unless they ask to drop them.
