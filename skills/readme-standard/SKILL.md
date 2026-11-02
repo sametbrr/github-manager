@@ -2,7 +2,7 @@
 name: readme-standard
 description: Creates, audits and fixes project READMEs against one consistent structure (Quick Start, Features, Requirements, Installation, Usage, License plus conditional sections), with badges detected from package.json, csproj, pyproject.toml, go.mod, plugin manifests or SKILL.md, and optional full translations such as README.tr.md. Use when the user asks to create, check, audit, fix, standardize or translate a README, for example "create readme", "audit readme", "fix readme", "sync mirrors", "readme oluştur", "readme kontrol et", "readme düzelt", "tr readme güncelle". Not for the login/login GitHub profile README (use profile-readme) or account-wide repo audits (use gh-audit). Audit mode writes nothing; other modes write only after the user confirms the file list.
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # readme-standard

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2] - 2026-11-03
+
+### Changed
+- README: readme-standard pass (nav line, Usage cheat sheet, footer), Contributing section, TR mirror fixes.
+- LICENSE copyright holder: Samet Birer.
+- CI: Dependabot for GitHub Actions; actions/checkout v7.
+
 ## [1.0.1] - 2026-11-02
 
 ### Changed

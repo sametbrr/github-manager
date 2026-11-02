@@ -1,10 +1,23 @@
 {
   "name": "github-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Audit and strengthen any GitHub account: profile fields, profile README, repo descriptions, topics, license, project READMEs and release workflows. Read-only audit first, every write confirmed.",
-  "author": { "name": "sametbrr", "email": "sametbrr@gmail.com", "url": "https://github.com/sametbrr" },
+  "author": {
+    "name": "sametbrr",
+    "email": "sametbrr@gmail.com",
+    "url": "https://github.com/sametbrr"
+  },
   "homepage": "https://github.com/sametbrr/github-manager",
   "repository": "https://github.com/sametbrr/github-manager",
   "license": "MIT",
-  "keywords": ["github", "github-profile", "readme", "repository-metadata", "release-automation", "agent-skills", "claude-code", "codex"]
+  "keywords": [
+    "github",
+    "github-profile",
+    "readme",
+    "repository-metadata",
+    "release-automation",
+    "agent-skills",
+    "claude-code",
+    "codex"
+  ]
 }
