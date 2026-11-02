@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
-[Quick Start](#quick-start) • [Installation](#installation) • [Usage](#usage) • [Configuration](#configuration) • [Troubleshooting](#troubleshooting)
+[Quick Start](#quick-start) • [Installation](#installation) • [Usage](#usage) • [Configuration](#configuration) • [Troubleshooting](#troubleshooting) • [Contributing](#contributing)
 
 # github-manager
 
@@ -159,6 +159,15 @@ github-manager/
 **Private repos or social accounts are missing from the audit** — the token lacks scopes. Check with `gh auth status` and add them with `gh auth refresh -s repo,read:org,user`.
 
 **`profile-bio` fails with HTTP 404 or 403 on `PATCH /user`** — the `user` scope is missing: `gh auth refresh -s user`.
+
+---
+
+## Contributing
+
+- Questions and ideas: [Discussions](https://github.com/sametbrr/github-manager/discussions)
+- Bugs: [issue tracker](https://github.com/sametbrr/github-manager/issues)
+- Pull requests: read the [contribution guide](https://github.com/sametbrr/.github/blob/main/CONTRIBUTING.md) first
+- Security reports: follow the [security policy](https://github.com/sametbrr/github-manager/security/policy), not a public issue
 
 ---
 

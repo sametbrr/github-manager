@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
-[Hızlı Başlangıç](#hızlı-başlangıç) • [Kurulum](#kurulum) • [Kullanım](#kullanım) • [Yapılandırma](#yapılandırma) • [Sorun Giderme](#sorun-giderme)
+[Hızlı Başlangıç](#hızlı-başlangıç) • [Kurulum](#kurulum) • [Kullanım](#kullanım) • [Yapılandırma](#yapılandırma) • [Sorun Giderme](#sorun-giderme) • [Katkıda Bulunma](#katkıda-bulunma)
 
 # github-manager
 
@@ -159,6 +159,15 @@ github-manager/
 **Denetimde private repolar veya sosyal hesaplar görünmüyor** — token'da yetki (scope) eksik. `gh auth status` ile kontrol edin, `gh auth refresh -s repo,read:org,user` ile ekleyin.
 
 **`profile-bio`, `PATCH /user` çağrısında HTTP 404 veya 403 ile duruyor** — `user` yetkisi eksik: `gh auth refresh -s user`.
+
+---
+
+## Katkıda Bulunma
+
+- Sorular ve fikirler: [Discussions](https://github.com/sametbrr/github-manager/discussions)
+- Hatalar: [issue takibi](https://github.com/sametbrr/github-manager/issues)
+- Pull request'ler: önce [katkı rehberini](https://github.com/sametbrr/.github/blob/main/CONTRIBUTING.md) okuyun
+- Güvenlik bildirimleri: herkese açık issue yerine [güvenlik politikasını](https://github.com/sametbrr/github-manager/security/policy) izleyin
 
 ---
 
