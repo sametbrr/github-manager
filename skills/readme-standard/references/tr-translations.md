@@ -1,6 +1,8 @@
 # Turkish Translations Reference
 
-Section headings, link text, and common prose patterns for README.tr.md generation.
+Section headings, link text, and common prose patterns for a Turkish mirror (`README.tr.md`).
+Used only when `"tr"` is in `readme.mirrors` (or `profile.mirrors`). This table ships as a ready
+option; for another language, translate the same items and keep the structure.
 
 ---
 
@@ -169,12 +171,12 @@ Bold labels inside per-command `###` subsections:
 
 ## Reference link lines (verbatim — do not translate)
 
-In README.tr.md, first line after badges:
+Link back (in README.tr.md, right after the translated one-line description, Rule 5):
 ```markdown
 > 🇬🇧 For English see [README.md](README.md)
 ```
 
-In README.md, after one-line description:
+Link from primary (in README.md, right after the one-line description, Rule 4):
 ```markdown
 > 🇹🇷 Türkçe için [README.tr.md](README.tr.md)
 ```

@@ -1,3 +1,7 @@
+{{TEMPLATE NOTE — Turkish mirror template, used only when "tr" is in readme.mirrors. For another
+language, follow the same structure with that language's text and file name README.<code>.md.
+Remove this note block from the output.}}
+
 {{BADGES — identical to README.md}}
 
 {{NAV_LINE — only if present in README.md; anchors use Turkish slugs (Rule 14):
@@ -97,6 +101,8 @@ Tablo biçimi (≥7 özellik):
 |---|---|---|
 | `alan` | `değer` | ne yapar |
 
+---
+
 }}
 
 {{NASIL_ÇALIŞIR_BÖLÜMÜ — yalnızca README.md'de varsa:
@@ -107,6 +113,8 @@ Tablo biçimi (≥7 özellik):
 3. Üçüncü adım
 
 ASCII diyagram varsa aynen kopyalanır — çevrilmez (Rule 6).
+
+---
 
 }}
 
@@ -119,6 +127,8 @@ proje/
 └── bileşen-b/    → açıklama
 ```
 
+---
+
 }}
 
 {{SINIRLAMALAR_BÖLÜMÜ — yalnızca README.md'de varsa (Rule 15):
@@ -128,6 +138,8 @@ proje/
 
 **Geçici çözüm:** {{kullanıcı nasıl aşar}}
 
+---
+
 }}
 
 {{SORUN_GİDERME_BÖLÜMÜ — yalnızca README.md'de varsa (Rule 15):
@@ -135,7 +147,11 @@ proje/
 
 **{{Belirti — kullanıcının gördüğü}}** — {{tek paragraf çözüm, gerekirse komutla}}.
 
+---
+
 }}
+
+{{PROJEYE_ÖZEL_BÖLÜMLER — yalnızca README.md'de varsa (Rule 10), aynı sırada, Türkçe başlıklarla; her bölümden sonra `---` (Rule 12)}}
 
 {{KATKIDA_BULUNMA_BÖLÜMÜ — yalnızca README.md'de varsa:
 ## Katkıda Bulunma
@@ -148,6 +164,8 @@ cd {{repo}}
 
 {{PR süreci — 1–2 cümle.}}
 
+---
+
 }}
 
 {{TOPLULUK_BÖLÜMÜ — yalnızca README.md'de varsa:
@@ -155,6 +173,8 @@ cd {{repo}}
 
 - [{{Kanal adı}}]({{url}})
 - [Issues]({{repo-url}}/issues)
+
+---
 
 }}
 
@@ -167,11 +187,13 @@ Tüm dokümantasyon: **[{{docs-url}}]({{docs-url}})**
 |---|---|
 | [{{Sayfa}}]({{url}}) | {{ne kapsıyor}} |
 
+---
+
 }}
 
 ## Lisans
 
-MIT — bkz. [LICENSE](LICENSE).
+{{SPDX_ID}} — bkz. [{{LICENSE_FILE}}]({{LICENSE_FILE}}).
 
 {{FOOTER — yalnızca README.md'de varsa (Rule 23), linkler aynı:
 ---

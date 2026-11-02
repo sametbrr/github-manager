@@ -1,10 +1,9 @@
-[![GitHub release](https://img.shields.io/github/v/release/sametbrr/readme-standard?display_name=tag&sort=semver)](https://github.com/sametbrr/readme-standard/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
 [![Agent Skills](https://img.shields.io/badge/agentskills.io-compatible-blue)](https://agentskills.io)
 
-# README Standard
+# readme-standard
 
-A Claude Code skill that enforces a consistent README.md + README.tr.md structure across projects — create, audit, fix, and keep the Turkish mirror in sync.
+Creates, audits and fixes project READMEs against one consistent structure, with badges detected from the project manifest and optional full translations (for example README.tr.md).
 
 > 🇹🇷 Türkçe için [README.tr.md](README.tr.md)
 
@@ -13,42 +12,49 @@ A Claude Code skill that enforces a consistent README.md + README.tr.md structur
 ## Quick Start
 
 ```bash
-git clone https://github.com/sametbrr/readme-standard ~/.claude/skills/readme-standard
+claude plugin marketplace add sametbrr/skill-hub
+claude plugin install github-manager@skill-hub
 ```
 
 ```
-> "create readme"     # generates README.md + README.tr.md from project metadata
-> "audit readme"      # prints a rule-by-rule checklist, writes nothing
+> "audit readme"      # rule-by-rule checklist, writes nothing
+> "create readme"     # README.md from project metadata (+ configured mirrors)
 ```
 
-That's it — project type, name, version, and badges are detected automatically.
+This skill ships inside the [github-manager](../../README.md) plugin. Its standalone repo is no longer the source of truth.
 
 ---
 
 ## Features
 
-- **Four modes** — Create, Audit, Fix, and TR Sync, triggered by natural language in Turkish or English
-- **23 enforced rules** — section order, exact heading names, badge patterns, callout forms, divider discipline
-- **Project type detection** — reads `package.json` / `.csproj` / `pyproject.toml` / `SKILL.md` for badges and metadata, with monorepo tiebreakers
-- **Conditional sections** — Uninstall, Troubleshooting, Limitations and others appear only when their detection signal is present
-- **Exact Turkish mirror** — README.tr.md with identical badges, translated prose, and untranslated code blocks
+- **Four modes** — Create, Audit, Fix and Mirror Sync, triggered in English or Turkish
+- **23 rules** — section order, exact heading names, badge patterns, callout forms, divider discipline
+- **Project type detection** — `package.json`, `*.csproj`, `pyproject.toml`, `go.mod`, plugin manifests, MCP servers, web apps, `SKILL.md`
+- **Conditional sections** — Uninstall, Troubleshooting, Limitations and others appear only when their signal is present
+- **Optional mirrors** — any language via `readme.mirrors`; a Turkish heading table ships with the skill
+- **Generated READMEs** — detects README generators and edits the source instead of the output
 
 ---
 
 ## Requirements
 
-- Claude Code (or any [agentskills.io](https://agentskills.io)-compatible agent)
-- A project with a manifest (`package.json`, `.csproj`, `pyproject.toml`, or `SKILL.md`) for auto-detection — otherwise the skill asks
+- Claude Code, Codex, or another [Agent Skills](https://agentskills.io) client
+- A project manifest for auto-detection (otherwise the skill asks)
 
 ---
 
 ## Installation
 
 ```bash
-git clone https://github.com/sametbrr/readme-standard ~/.claude/skills/readme-standard
+# Claude Code
+claude plugin marketplace add sametbrr/skill-hub
+claude plugin install github-manager@skill-hub
+# Codex
+codex plugin marketplace add sametbrr/skill-hub
+codex plugin add github-manager@skill-hub
+# Manual (any Agent Skills client): copy skills/readme-standard into ~/.claude/skills/ or ~/.agents/skills/
+# (readme-standard has no sibling references, so it works when copied alone)
 ```
-
-Start a new Claude Code session in the project whose README you want to manage.
 
 ---
 
@@ -56,15 +62,15 @@ Start a new Claude Code session in the project whose README you want to manage.
 
 | Mode | Trigger examples | What happens |
 |---|---|---|
-| **Create** | "create readme", "readme oluştur" | Generates both README.md and README.tr.md from templates and detected metadata |
-| **Audit** | "audit readme", "readme kontrol et" | Prints ✅/❌/⚠️ per rule with line references — writes no files |
-| **Fix** | "fix readme", "readme düzelt" | Rewrites existing README(s) to match the standard, confirming before overwrite |
-| **TR Sync** | "sync tr readme", "tr readme güncelle" | Regenerates README.tr.md only, from the current README.md |
+| **Create** | "create readme", "readme oluştur" | Generates README.md (and each configured mirror) from templates and detected metadata |
+| **Audit** | "audit readme", "readme kontrol et" | Prints ✅/❌/⚠️ per rule with line references; writes nothing |
+| **Fix** | "fix readme", "readme düzelt" | Rewrites existing README(s) to match the standard after confirmation |
+| **Mirror Sync** | "sync mirrors", "tr readme güncelle" | Regenerates mirrors only, from the current README.md |
 
-The full rule set with correct/wrong examples lives in [references/rules.md](references/rules.md); badge markdown per project type in [references/badge-patterns.md](references/badge-patterns.md); heading and prose translations in [references/tr-translations.md](references/tr-translations.md).
+Mirrors and badges are set in `~/.agents/github-manager/config.json` (`readme.mirrors`, `readme.badges`, `readme.extraSections`); see [SKILL.md](SKILL.md). Full rules: [references/rules.md](references/rules.md).
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](../../LICENSE).

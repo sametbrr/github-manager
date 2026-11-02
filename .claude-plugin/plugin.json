@@ -1,8 +1,10 @@
 {
   "name": "github-manager",
-  "description": "Claude Code plugin that audits and fixes a GitHub account end-to-end — profile fields, profile README, repo descriptions, topics and project READMEs, interactively and per chosen scope.",
-  "author": { "name": "sametbrr", "email": "sametbrr@gmail.com" },
+  "version": "1.0.0",
+  "description": "Audit and strengthen any GitHub account: profile fields, profile README, repo descriptions, topics, license, project READMEs and release workflows. Read-only audit first, every write confirmed.",
+  "author": { "name": "sametbrr", "email": "sametbrr@gmail.com", "url": "https://github.com/sametbrr" },
+  "homepage": "https://github.com/sametbrr/github-manager",
   "repository": "https://github.com/sametbrr/github-manager",
   "license": "MIT",
-  "keywords": ["agent-skills", "claude-code", "github", "automation", "readme", "repository-metadata"]
+  "keywords": ["github", "github-profile", "readme", "repository-metadata", "release-automation", "agent-skills", "claude-code", "codex"]
 }

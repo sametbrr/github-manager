@@ -1,50 +1,65 @@
 ---
 name: profile-bio
-description: Claude Code skill that fills GitHub account profile fields — name, bio, company, location, blog and social accounts — via the GitHub API, asking for any missing value without inventing one.
+description: Fills in GitHub account profile fields (name, bio, company, location, blog, social accounts) through the GitHub API, asking for every missing value instead of inventing one and confirming before any write. Use when the user wants to complete or update their GitHub profile details.
 disable-model-invocation: true
+metadata:
+  version: "1.0.0"
 ---
 
 # profile-bio
 
-GitHub hesap profil alanlarını interaktif doldurur (`PATCH /user` + social accounts).
-**Değer uydurmaz** — eksik alanı sorar. Yazma onaylıdır.
+Fills in GitHub account fields (`PATCH /user` and social accounts) interactively. **Never invents a
+value**; asks for what is missing. Writes only after approval.
 
-## 0. Auth preflight
-`user` scope şart:
+Run only when the user explicitly asks.
+
+## 0. Preflight
+
+The `user` scope is required for writes.
+
 ```bash
-gh auth status >/dev/null 2>&1 || echo "→ ! gh auth login --web -s repo,read:org,user"
+gh auth status 2>&1 | grep -i "token scopes"   # must list 'user'
 ```
 
-## 1. Mevcut durumu oku
+If not logged in or the scope is missing, ask the user to run
+`gh auth refresh -s user` (or `gh auth login -s user`) and wait.
+
+## 1. Read the current state
+
 ```bash
-gh api user --jq '{name,bio,company,location,blog,twitter_username}'
+gh api user --jq '{login,name,bio,company,location,blog,twitter_username,hireable}'
 gh api /user/social_accounts --jq '[.[]|{provider,url}]'
 ```
 
-## 2. Standarda göre değerlendir
-Oku: `${CLAUDE_PLUGIN_ROOT}/STANDARDS/profile-bio.md`.
-Eksik/zayıf alanları çıkar (zorunlu: name, bio≤160; önerilen: location, blog, ≥2 social).
+## 2. Evaluate
 
-## 3. Eksikleri SOR (uydurma yok)
-- Zorunlu eksik (name/bio) → kullanıcıya sor.
-- Önerilen eksik (location/blog/company/social) → "doldurmak ister misin?" diye sor; boş bırakılabilir.
-- `company` dahil hiçbir değeri tahmin etme.
-- API'de olmayanları (pronouns, PRO badge, local time) **manuel** olarak not düş, dokunma.
+Standard: [references/profile-bio.md](references/profile-bio.md). List empty and weak fields
+(recommended: name, bio ≤ 160, blog, ≥ 1 social account; optional: location, company).
 
-## 4. Diff + onay
-Değişecek alanları `mevcut → yeni` göster. Kullanıcı onaylamadan yazma (dışa-dönük değişiklik).
+## 3. Ask for missing values
 
-## 5. Uygula
+- Recommended field empty → ask the user and wait for an explicit answer.
+- Optional field empty → ask once whether they want to fill it; empty is fine.
+- Never guess any value, including `company` and `location`.
+- Fields the API can't set (pronouns, PRO badge, local time, pins, avatar) → list them as manual
+  steps; don't touch them.
+
+## 4. Diff and approval
+
+Show `current → new` for every field that changes. Don't write before an explicit yes.
+
+## 5. Apply
+
+Send only the changed fields. Pass values as separate `-f` arguments.
+
 ```bash
-# yalnız değişen alanlar:
-gh api -X PATCH /user -f name='...' -f bio='...' -f company='...' -f location='...' -f blog='...'
-# social ekle:
-gh api -X POST /user/social_accounts -f "account_urls[]=https://..."
-# social sil (gerekirse):
-gh api -X DELETE /user/social_accounts -f "account_urls[]=https://..."
+gh api -X PATCH /user -f name="$name" -f bio="$bio" -f blog="$blog"
+gh api -X POST /user/social_accounts -f "account_urls[]=$url"
+gh api -X DELETE /user/social_accounts -f "account_urls[]=$url"   # only when the user asks
 ```
 
-## Kurallar
-- Değer **uydurma** (CLAUDE.md #7); kullanıcı atlarsa boş kalsın.
-- Yazma **onaylı** (CLAUDE.md #8); dokunulmayan alanı gönderme (CLAUDE.md #6).
-- Mevcut social hesapları silme (kullanıcı istemedikçe).
+## Rules
+
+- Never invent values; a skipped field stays empty.
+- Every write needs explicit approval; never send unchanged fields.
+- Never delete existing social accounts unless the user asks.

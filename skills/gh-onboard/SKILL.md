@@ -1,44 +1,69 @@
 ---
 name: gh-onboard
-description: Claude Code skill that sets up or cleans a GitHub account end-to-end — interactively audits and fixes profile fields, profile README, repo descriptions, topics and project READMEs.
+description: Guides a GitHub account from audit to fixes end to end, interactively and stage by stage, covering profile fields, profile README, repo descriptions and topics, project READMEs and release workflows, with every write confirmed. Use when the user wants to set up, clean up or strengthen their whole GitHub presence in one guided session.
 disable-model-invocation: true
+metadata:
+  version: "1.0.0"
 ---
 
 # gh-onboard
 
-Boş/dağınık bir GitHub hesabını uçtan uca kuran interaktif orkestratör.
-Diğer skill/agent'ları sırayla çağırır; her yazma adımı onaylıdır.
+Interactive orchestrator for a whole GitHub account. Runs the other skills of this plugin in a
+fixed order; every write stage is opt-in and confirmed.
 
-## 0. Auth bootstrap (tam scope, tek sefer)
+Run only when the user explicitly asks.
+
+## 0. Preflight
+
 ```bash
-command -v gh >/dev/null || { echo "→ brew install gh"; exit 1; }
-gh auth status >/dev/null 2>&1 || echo "→ ! gh auth login --web -s repo,read:org,user"
+command -v gh >/dev/null || echo "gh CLI missing: https://cli.github.com"
+gh auth status >/dev/null 2>&1 || echo "not logged in"
 ```
 
-## 1. Kapsam seç
-`--scope public|private|all` verilmemişse **SOR** (public/private/all).
+If `gh` is missing, point to https://cli.github.com and stop. If not logged in, ask the user to run
+`gh auth login -s repo,read:org,user` and wait.
 
-## 2. Tara (read-only)
-`gh-audit` çalıştır → önceliklendirilmiş sağlık raporu (profil + repolar).
-Kullanıcıya raporu göster; hangi bölümleri düzeltmek istediğini sor.
+## 1. Preferences
 
-## 3. Profil kimliği
-Eksik hesap alanı varsa → `profile-bio` (interaktif, sorar, onaylı yazar).
+Read the config (`${GITHUB_MANAGER_HOME:-$HOME/.agents/github-manager}/config.json`). If none
+exists, show the defaults from `../gh-audit/references/config.md` and ask whether they fit. Typical
+questions: README mirrors in another language? Description period style? Profile README sections?
+If the user wants changes, show the JSON and offer to save it to `~/.agents/github-manager/` (or
+`$GITHUB_MANAGER_HOME`) after an explicit yes. If writing there is blocked, say so and let the user
+save it.
 
-## 4. Profil README
-`<login>/<login>` README yok/zayıfsa → `profile-readme` (üret, diff, onaylı push).
+## 2. Scope
 
-## 5. Repo metadata
-Seçilen kapsamdaki repolarda → `gh-normalize` (desc + topics, batch + repo-başına onay).
+If `--scope public|private|all` wasn't given, ask the user and wait for an explicit answer.
 
-## 6. Proje README'leri
-README'si eksik/zayıf repolarda → `readme-standard` (create/fix/tr-sync).
+## 3. Audit (read-only)
 
-## 7. Özet + kalan
-Yapılanları + API ile yapılamayanları (pronouns, PRO badge, local time) + manuel işleri listele.
+Follow `../gh-audit/SKILL.md` with `--scope <chosen scope>` (account mode, even when run inside a
+clone). Show the report and ask which stages to run. Pass the same `--scope` to `gh-normalize`.
 
-## Akış kuralları
-- Sıra: kimlik → public repo metadata → public README → (opsiyonel) private.
-- Her aşama **opt-in**: kullanıcı atlayabilir.
-- Read önce, write sonra; hiçbir dışa-dönük adım onaysız (CLAUDE.md #8).
-- Hesabı genel okur (`gh api user`) — kullanıcıya özel hardcode yok; başka hesapta da çalışır.
+## 4. Stages (each optional, in this order)
+
+| Stage | Skill | Runs when |
+|---|---|---|
+| Profile fields | `../profile-bio/SKILL.md` | the audit lists empty or weak fields |
+| Profile README | `../profile-readme/SKILL.md` | missing, weak or out of date |
+| Repo metadata | `../gh-normalize/SKILL.md` | description or topic findings |
+| Project READMEs | `../readme-standard/SKILL.md` (audit, then create or fix per repo) | README findings; needs a local clone per repo |
+| Release workflows | `../release-workflow/SKILL.md` | the user wants automated releases for chosen repos; needs a local clone |
+| License | `../gh-audit/references/license.md` | public repos without a recognised license; only report and ask |
+
+Before each stage, say what it will change and ask whether to run it, skip it, or stop.
+
+## 5. Wrap-up
+
+List what changed, what was skipped, and the manual steps the API can't do (pronouns, PRO badge,
+local time, pinned repos, avatar). Remind the user that local file changes (READMEs, workflows)
+are not committed until they approve.
+
+## Flow rules
+
+- Order: identity → public repo metadata → public READMEs → releases → private repos (optional).
+- Read first, write later. No outward-facing step (API write, commit, push) without explicit
+  approval.
+- Works for any account: read the login from `gh api user`; nothing about a specific user is
+  hardcoded.

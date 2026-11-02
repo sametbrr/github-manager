@@ -1,58 +1,103 @@
 ---
 name: release-workflow
-description: Claude Code skill that installs a project-type-aware auto-release GitHub Actions workflow (.github/workflows/release.yml) into a repo — reads the version from SKILL.md / package.json / *.csproj / pyproject.toml / VERSION and cuts a tag plus GitHub release on every version bump. Manually invoked, single local repo, never commits.
+description: Installs a project-type-aware GitHub Actions release workflow (.github/workflows/release.yml) into a local repo. Detects npm, MCP server, NuGet, Python, Go (plain, GoReleaser or with an npm wrapper), agent plugin, single skill and VERSION-file projects plus the default branch, then tags, publishes to the registry and creates a GitHub release. Use when the user wants automated releases or publishing for a repo. Never commits.
 disable-model-invocation: true
+metadata:
+  version: "1.0.0"
 ---
 
 # release-workflow
 
-Bir repoya **otomatik release** workflow'u kurar: `main`'e push'ta proje tipinin version
-dosyası değişince, version'ı okur, tag yoksa tag + GitHub Release oluşturur. Üreten skill
-budur; otomasyon bir kez kurulunca repo kendi release'ini açar.
+Writes `.github/workflows/release.yml` for one local repo. After the user commits it, the repo
+releases itself: tag, registry publish where there is one, and a GitHub release with notes.
 
-## Kullanım
-```
-release-workflow [--repo-dir <path>] [--type skill|npm|nuget|python|generic] [--audit] [--force]
-```
-- `--repo-dir` yoksa cwd kullanılır.
-- `--type` yoksa otomatik tespit edilir.
+Run only when the user explicitly asks.
 
-## 0. Auth/araç preflight
+## Usage
+
+```
+release-workflow [--repo-dir <path>] [--type <type>] [--branch <name>] [--audit] [--force]
+```
+
+`--repo-dir` defaults to the current directory. `--type` and `--branch` default to detection.
+
+## 1. Detect
+
+The script lives in this skill's folder, but you run it while the target repo is the working
+directory. Resolve `scripts/add-release-workflow.sh` against this skill's directory to an absolute
+path first and use that (`$SCRIPT` below).
+
 ```bash
-command -v gh >/dev/null || echo "→ ! gh gerekli (workflow gh release create kullanır)"
+bash "$SCRIPT" <repo-dir> --detect
 ```
 
-## 1. Hedef + tip
-- Hedef dizin: `--repo-dir` ya da cwd. Git repo olmalı (release.yml orada anlamlı).
-- Tip tespiti (öncelik): `package.json`→npm · `*.csproj`→nuget · `pyproject.toml`→python · `SKILL.md`→skill · `VERSION`→generic.
-- Tespit edilemezse → kullanıcıya SOR (`--type`) ya da `VERSION` dosyası öner.
+Detection order (first match wins):
 
-## 2. Mod
-- **--audit** (yazma yok): release.yml var mı, tespit edilen tiple uyumlu mu raporla. = dry-run.
-- **add** (varsayılan): release.yml yoksa kur.
-- **--force**: var olanı tespit edilen tipin template'iyle üzerine yaz.
+| Type | Signal | Trigger | Publishes to |
+|---|---|---|---|
+| `goreleaser` | `go.mod` + `.goreleaser.yaml` | tag push `v*` | GoReleaser (GitHub release + its publishers) |
+| `go-npm` | `go.mod` + `npm/package.json` wrapper | tag push `v*` | GitHub release binaries + npm wrapper |
+| `go` | `go.mod` | tag push `v*` | GitHub release with 6 cross-compiled binaries + checksums |
+| `mcp` | public `package.json` with `@modelcontextprotocol/sdk` or `server.json` | version bump or tag push | npm (provenance) + MCP Registry if `server.json` |
+| `npm` | public `package.json` with a version | version bump or tag push | npm (provenance) |
+| `plugin` | `.claude-plugin/plugin.json` | bump of its `version` | GitHub release only; cross-checks `.codex-plugin` and `skills/*/SKILL.md` versions |
+| `nuget` | packable `*.csproj` | `<Version>` bump or tag push | nuget.org |
+| `python` | `pyproject.toml` | version bump or tag push | PyPI (trusted publishing) |
+| `skill` | one `SKILL.md` (root or `skills/<name>/`) | frontmatter version bump | GitHub release only |
+| `generic` | `VERSION` file | change of `VERSION` | GitHub release only |
+| `npm` (private) | `package.json` with `"private": true` | version bump | GitHub release only |
 
-## 3. Uygula
+The release branch is the remote default branch (`origin/HEAD`), then the current branch, then
+`main`. Show the detection output to the user. If nothing is detected, ask for `--type` or suggest
+a `VERSION` file.
+
+## 2. Mode
+
+- `--audit`: no writes. Report whether `release.yml` exists, whether it matches the detected type,
+  and whether other workflows already publish (the script warns about them). Check existing
+  workflows for unsafe patterns: commit text pasted into `run:` (for example
+  `--notes "${{ steps.x.outputs.notes }}"`), hardcoded `main` on a repo whose default branch
+  differs, publishing without a tag/version check.
+- add (default): write `release.yml` if it doesn't exist.
+- `--force`: overwrite the existing file after the user confirms.
+
+Preview first when useful: `bash "$SCRIPT" <repo-dir> --stdout`.
+
+## 3. Apply
+
 ```bash
-bash scripts/add-release-workflow.sh <repo-dir> [--type <t>] [--force]
-```
-- Idempotent: dosya varsa `--force` olmadan dokunmaz.
-- **Commit/push YOK** (CLAUDE.md #8) — workflow dosyasını kullanıcı onaylı commit'ler.
-
-## 4. Version alanı kontrolü
-release.yml seçilen version dosyasını okur; o dosyada geçerli version yoksa workflow boş `v`
-üretir. Kullanıcıya version eklemesini hatırlat:
-- skill → SKILL.md frontmatter `version:` · npm → package.json `version` · nuget → `<Version>`
-  · python → pyproject.toml `version` · generic → `VERSION` dosyası.
-
-## 5. Özet
-```
-RELEASE-WORKFLOW: <repo>
-  tip: <skill|npm|nuget|python|generic>   release.yml: <yazıldı|atlandı|audit:var/yok>
-  sonraki: version artır + main'e push → otomatik tag + release
+bash "$SCRIPT" <repo-dir> [--type <type>] [--branch <name>] [--force]
 ```
 
-## Kurallar
-- Tek repo, yerel dizin. Batch (uzak repolara toplu kurulum) kapsam dışı.
-- Yazma onaylı; commit/push kullanıcıya bırakılır (CLAUDE.md #8).
-- Sadece hedef reponun `.github/workflows/release.yml`'i; başka dosyaya dokunma (CLAUDE.md #6).
+The script writes one file and never commits, pushes or calls the GitHub API.
+
+## 4. Tell the user what the workflow needs
+
+- **Version field**: npm/mcp → `package.json` `version`; nuget → `<Version>`; python →
+  `[project] version` (dynamic versions: release by tag push); plugin →
+  `.claude-plugin/plugin.json` `version` (keep `.codex-plugin/plugin.json` and every SKILL.md
+  `metadata.version` equal); skill → frontmatter version; generic → `VERSION`; Go → tags only.
+- **Secrets / publisher setup**: npm → `NPM_TOKEN` or npm trusted publishing; nuget →
+  `NUGET_API_KEY`; python → a PyPI trusted publisher with environment `pypi`; MCP Registry →
+  `mcpName` in `package.json` and a `server.json`.
+- **Private repos**: remove `--provenance` from npm templates.
+- **Existing publishers**: if another workflow already publishes, suggest removing one of them to
+  avoid double publishing.
+
+## 5. Summary
+
+```
+RELEASE-WORKFLOW  <repo>
+  type: <type>   branch: <branch>   release.yml: written | skipped | audit
+  next: bump the version (or push a tag) after committing the workflow
+```
+
+## Rules
+
+- One local repo per run. Batch installs across remote repos are out of scope.
+- Write only `.github/workflows/release.yml` in the target repo. Never commit or push without
+  explicit user approval.
+- Templates never paste commit messages into shell commands; notes come from
+  `--generate-notes` or a notes file.
+- Every template refuses to release from anything but the default branch: a manual run must start
+  on it, and a pushed tag must point to a commit reachable from it.

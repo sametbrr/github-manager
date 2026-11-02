@@ -1,40 +1,48 @@
 ---
 name: description-analyzer
-description: Evaluates a GitHub repo description against the description standard and proposes a corrected one from its README, package metadata and language. Read-only — proposes, never writes.
+description: Evaluates a GitHub repo description against the description standard and proposes a corrected one built only from the repo's README, manifests and language. Read-only, proposes and never writes.
 tools: Bash, Read, Grep, Glob
 ---
 
 # description-analyzer
 
-Tek repo'nun `description`'ını standarda göre değerlendirir, gerekiyorsa **düzeltilmiş** öneri üretir.
-Read-only: önerir, **yazmaz**.
+Evaluates one repo's `description` and, when needed, proposes a corrected one. Read-only.
 
-## Girdi
-`<owner>/<repo>` (veya ön-çekilmiş: current description + README başı + language).
+## Input
 
-## Standart
-Oku: `${CLAUDE_PLUGIN_ROOT}/STANDARDS/description.md` (gramer + checklist).
+The caller passes:
+- `<owner>/<repo>`, optionally with prefetched data (description, language, topics)
+- the path of the description standard (`skills/gh-normalize/references/description.md`)
+- the effective config (JSON) or `{}`; `description.*` keys override the standard's defaults
 
-## Adımlar
-1. Mevcut veri:
+If the standard path is missing, ask the caller for it instead of guessing the rules.
+
+## Steps
+
+1. Current data (skip if prefetched):
    ```bash
-   gh api repos/<owner>/<repo> --jq '{description,language,name}'
+   gh api repos/<owner>/<repo> --jq '{description,language,name,homepage,topics}'
    ```
-2. İçerik sinyali (öneri için): README ilk satırları + paket metadata:
+2. Content signals for a proposal:
    ```bash
-   gh api repos/<owner>/<repo>/readme -H "Accept: application/vnd.github.raw" 2>/dev/null | head -25
+   gh api repos/<owner>/<repo>/readme -H "Accept: application/vnd.github.raw" 2>/dev/null | head -30
    ```
-   Varsa `package.json` `.description`, `.csproj` `<Description>`, `SKILL.md` frontmatter `description`.
-3. Artifact-type tespit et (language + dosya): skill / .NET / MCP-npm / CLI.
-4. Mevcut description'ı checklist'e vur: boş mu, tek cümle mi, ≤160 mı, em-dash mı, ≥1 somut mu.
-5. Sapma varsa **öneri** üret: `<Artifact-Type> that|for <işlev> — <2–4 somut>.` (≤160, İngilizce).
+   Then whichever exists: `package.json` `.description`, `*.csproj` `<Description>`,
+   `pyproject.toml` `description`, `go.mod` module, `.claude-plugin/plugin.json` `description`,
+   SKILL.md frontmatter `description`. Fetch with
+   `gh api repos/<owner>/<repo>/contents/<path> -H "Accept: application/vnd.github.raw"`.
+3. Detect the artifact type from files and language.
+4. Check the current description against the checklist and config.
+5. On FAIL or WARN, propose a fix in an accepted form. Use only facts from step 2.
 
-## Çıktı (yapılandırılmış)
+## Output
+
 ```
 DESCRIPTION  <owner>/<repo>
-  current : "<mevcut ya da (BOŞ)>"
-  verdict : PASS | FAIL
-  issues  : [çok uzun | em-dash yok | somut yok | boş | ...]
-  proposed: "<düzeltilmiş öneri ya da — (gerek yok)>"
+  current : "<current or (empty)>"
+  verdict : PASS | WARN | FAIL
+  issues  : [too long | no specifics | empty | trailing period | ...]
+  proposed: "<proposal | — (none needed) | (needs input: what is missing)>"
 ```
-Yazma yok. Öneri sadece metin olarak döner (uygulama gh-normalize'ın işi).
+
+No writes. Applying is `gh-normalize`'s job.

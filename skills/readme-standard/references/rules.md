@@ -2,11 +2,19 @@
 
 Full detail for each rule. Use during Audit and Fix modes.
 
+**Terms.** The *primary README* is `README.md`, written in the configured `language` (default
+English). A *mirror* is a full translation `README.<code>.md` for each language code in
+`readme.mirrors` (default: none). Rules marked **(mirrors)** apply only when at least one mirror is
+configured or already exists. The examples use a Turkish mirror (`README.tr.md`), which ships with
+a heading table in [tr-translations.md](tr-translations.md); other languages follow the same
+pattern.
+
 ---
 
 ## Rule 1 — No inline bilingual content
 
-Never write `**EN:** ... **TR:** ...` patterns within a single file. Each file is one language only.
+Never write `**EN:** ... **TR:** ...` patterns within a single file. Each file is one language
+only. This applies with or without mirrors: a README never mixes two languages.
 
 ❌ Wrong:
 ```markdown
@@ -14,13 +22,13 @@ Never write `**EN:** ... **TR:** ...` patterns within a single file. Each file i
 **TR:** Bu kütüphane servisleri otomatik kaydeder.
 ```
 
-✅ Correct: README.md contains only EN prose; README.tr.md contains only TR prose.
+✅ Correct: README.md contains only primary-language prose; each mirror contains only its own language.
 
 ---
 
 ## Rule 2 — Quick Start is always first
 
-The first `##` section after the description and TR reference link must be `## Quick Start`.
+The first `##` section after the description (and the mirror link line, if any) must be `## Quick Start`.
 
 ❌ Wrong order:
 ```markdown
@@ -58,42 +66,52 @@ Then create a new project and add the package...
 ## Quick Start
 
 ```bash
-dotnet add package AssemblyServiceRegistrar
+npm install acme-widget
 ```
 
-```csharp
-builder.Services.AddServicesFromAssembly(Assembly.GetExecutingAssembly());
+```js
+import { widget } from "acme-widget";
+widget.render("#app");
 ```
 
-That's it — no manual registration needed.
+That's it — no configuration needed.
 ```
 
 ---
 
-## Rule 4 — TR reference link in README.md
+## Rule 4 — Mirror link line in README.md (mirrors)
 
-Appears immediately after the one-line description, before the first `---` divider. Exact format, no variation.
+Only when mirrors exist. One blockquote line immediately after the one-line description, before
+the first `---` divider, linking every mirror. No line at all when there are no mirrors.
 
-✅ Correct:
+Format per language: use the "link from primary" line of that language's translation table if one
+exists, otherwise the generic form. Several mirrors share one line, separated by ` · `.
+
+✅ Correct (Turkish, from [tr-translations.md](tr-translations.md)):
 ```markdown
 > 🇹🇷 Türkçe için [README.tr.md](README.tr.md)
 ```
 
+✅ Correct (generic, several mirrors):
+```markdown
+> 🌐 [Türkçe](README.tr.md) · [Deutsch](README.de.md)
+```
+
 ❌ Wrong:
 ```markdown
-[Türkçe](README.tr.md)
+[Türkçe](README.tr.md)                        ← not a blockquote, placed elsewhere
 **TR:** Türkçe için README.tr.md dosyasına bakın.
-> Turkish: [README.tr.md](README.tr.md)
-🇹🇷 [README.tr.md](README.tr.md)
+> 🇹🇷 Türkçe için [README.tr.md](README.tr.md)   ← in a README with no README.tr.md
 ```
 
 ---
 
-## Rule 5 — EN reference link in README.tr.md
+## Rule 5 — Back link in each mirror (mirrors)
 
-Appears immediately after the one-line Turkish description. Exact format:
+Immediately after the translated one-line description of a mirror, link back to the primary
+README. Use the table's "link back" line or the generic `> 🌐 [English](README.md)`.
 
-✅ Correct:
+✅ Correct (Turkish mirror):
 ```markdown
 > 🇬🇧 For English see [README.md](README.md)
 ```
@@ -102,27 +120,27 @@ Appears immediately after the one-line Turkish description. Exact format:
 
 ## Rule 6 — Code blocks are never translated
 
-Code, shell commands, JSON, XML, YAML — all stay in English in both files.
+Code, shell commands, JSON, XML, YAML stay identical in the primary README and every mirror.
 
 ❌ Wrong in README.tr.md:
 ```csharp
-// Servis arayüzünüzü bir lifetime marker ile işaretleyin
-public interface IKullaniciServisi : IScopedService { }
+// Widget'ı oluştur ve sayfaya bağla
+const bilesen = widget.olustur("#uygulama");
 ```
 
 ✅ Correct in README.tr.md:
 ```csharp
-// Mark your interfaces with a lifetime marker
-public interface IUserService : IScopedService { }
+// Create the widget and mount it
+const widget = widget.create("#app");
 ```
 
-Note: inline comments inside code are debatable — keep English for consistency unless the user explicitly prefers Turkish comments.
+Note: inline comments inside code are debatable — keep them identical to the primary README unless the user explicitly prefers translated comments.
 
 ---
 
 ## Rule 7 — Tables are monolingual
 
-No bilingual columns anywhere. README.md tables → EN only. README.tr.md tables → TR only.
+No bilingual columns anywhere. README.md tables use the primary language only; each mirror's tables use its own language only.
 
 ❌ Wrong (bilingual columns):
 ```markdown
@@ -181,7 +199,9 @@ MIT — see [LICENSE](LICENSE).
 ```
 
 For `.txt` extension: `MIT — see [LICENSE.txt](LICENSE.txt).`
-For non-MIT licenses: replace `MIT` with the actual SPDX identifier.
+For other licenses: use the detected SPDX identifier (`Apache-2.0 — see [LICENSE](LICENSE).`).
+No license file: don't invent one. Write the section only after the user names a license, and
+report the missing file (Audit: ❌ FAIL for a public repo).
 
 ❌ Wrong:
 ```markdown
@@ -204,7 +224,15 @@ Every README.md must contain ALL of these sections, in this order, before any pr
 4. `## Installation`
 5. `## Usage`
 
-These are non-negotiable regardless of project type (package, skill, tool, library). If a section's content is brief (e.g., Installation = one git clone line), it still appears as a named section.
+These are non-negotiable regardless of project type (package, skill, tool, library, app). If a section's content is brief (e.g., Installation = one git clone line), it still appears as a named section.
+
+**Project-specific sections.** Sections that are not in the core or conditional lists (for example
+`## API`, `## Benchmarks`, `## Deployment`, `## Environment Variables` for a web app, `## MCP Tools`
+for an MCP server) go in one slot: after Troubleshooting, before Contributing. When Troubleshooting
+or Contributing is absent, the placement rule of the conditional sections applies (after the nearest
+present section that precedes the slot). Names listed in `readme.extraSections` are always accepted there. Others are accepted
+when they hold project-specific content; Audit reports them as ⚠️ WARN only if a core or
+conditional name would fit (Rule 11).
 
 ❌ Wrong — missing Requirements and Installation:
 ```markdown
@@ -228,9 +256,10 @@ These are non-negotiable regardless of project type (package, skill, tool, libra
 
 ## Rule 11 — Section names must match exactly
 
-The five core sections must use these exact English names (README.md) and Turkish names (README.tr.md). No variations, synonyms, or creative titles.
+The core sections must use these exact names in README.md, and the translated names from the
+language's translation table in each mirror. No variations, synonyms, or creative titles.
 
-| README.md | README.tr.md |
+| README.md | README.tr.md (example mirror) |
 |---|---|
 | `## Quick Start` | `## Hızlı Başlangıç` |
 | `## Features` | `## Özellikler` |
@@ -250,7 +279,7 @@ The five core sections must use these exact English names (README.md) and Turkis
 
 **Approved aliases** — the ONLY permitted deviations, each tied to a condition:
 
-| Core name | Approved alias | Condition | TR alias |
+| Core name | Approved alias | Condition | TR alias (mirror) |
 |---|---|---|---|
 | `## Usage` | `## Commands` | CLI/plugin project using the per-command template (Rule 21) | `## Komutlar` |
 | `## Quick Start` | `## Get Started` | Getting running requires ≥4 sequential numbered steps (see below) | `## Başlarken` |
@@ -271,7 +300,7 @@ its own command block, and may exceed Rule 3's 15-line cap. If the steps fit in
 ```
 
 Any other variation is still a FAIL. An alias replaces its core name everywhere
-(nav line, TR mirror) — never both names in one file.
+(nav line, mirrors) — never both names in one file.
 
 ---
 
@@ -307,25 +336,25 @@ Every `##` section must be preceded by a `---` horizontal rule (with a blank lin
 
 ## Rule 13 — Description is plain text, one line
 
-The project description (between the `# Title` and the TR reference link) must be:
+The project description (between the `# Title` and the mirror link line or the first `---`) must be:
 - Plain text — no `>` blockquote formatting
 - Exactly one line — no multi-paragraph descriptions
 
 ❌ Wrong — blockquote:
 ```markdown
-> A Claude Code skill for building a wiki...
+> A small library for rendering widgets...
 ```
 
 ❌ Wrong — two paragraphs:
 ```markdown
-An Agent Skill that turns any rough idea into an expert prompt.
+A library for rendering widgets.
 
-Purpose-built for Claude. Follows Anthropic's official prompting practices...
+Built for modern browsers. Follows the latest web standards...
 ```
 
 ✅ Correct:
 ```markdown
-An Agent Skill that turns any rough idea into a domain-classified, quality-reviewed expert prompt.
+A dependency-free library that renders accessible widgets — 12 components, 4 KB gzipped.
 ```
 
 ---
@@ -346,7 +375,7 @@ If the README has ≥8 `##` sections OR ≥200 lines, add a single anchor nav li
 - [Installation](#installation)
 ```
 
-In README.tr.md, anchors point to the Turkish heading slugs:
+In a mirror, anchors point to that language's heading slugs (Turkish example):
 ```markdown
 [Hızlı Başlangıç](#hızlı-başlangıç) • [Kurulum](#kurulum) • [Kullanım](#kullanım)
 ```
@@ -374,10 +403,10 @@ Long pattern (alternative — for complex multi-step fixes): `### Symptom` → `
 ```markdown
 ## Limitations
 
-Sessions are indexed by absolute path, so the same repo cloned to different
-paths is treated as a different project.
+The cache is keyed by absolute path, so the same project in two folders is
+indexed twice.
 
-**Workaround:** clone repos to the same path (e.g. `~/Projects/`) on every machine.
+**Workaround:** keep projects at the same path on every machine, or run `widget cache clear`.
 ```
 
 ❌ Wrong — constraint with no workaround or reason:
@@ -413,7 +442,7 @@ npm install -g tool
 </details>
 ```
 
-In README.tr.md the `<summary>` text is translated; all other rules apply unchanged.
+In a mirror the `<summary>` text is translated; all other rules apply unchanged.
 
 ---
 
@@ -424,7 +453,7 @@ The conditional sections (value paragraph, Uninstall, Configuration, How It Work
 - Condition unmet → section is **absent**. Empty sections, "N/A" bodies, and placeholders are FAIL.
 - User instruction overrides detection in both directions.
 - Audit: section↔signal mismatches are ⚠️ WARN, never ❌ FAIL.
-- README.tr.md contains exactly the same section set as README.md.
+- Every mirror contains exactly the same section set as README.md.
 
 ❌ Wrong:
 ```markdown
@@ -447,7 +476,7 @@ Exactly three callout forms, all blockquote-bold:
 > **Heads up:** unexpected behavior / platform difference
 ```
 
-TR equivalents: `> **⚠️ Önemli:**`, `> **Not:**`, `> **Dikkat:**`
+Mirror equivalents come from the translation table (Turkish: `> **⚠️ Önemli:**`, `> **Not:**`, `> **Dikkat:**`).
 
 ❌ Wrong:
 ```markdown
@@ -466,31 +495,30 @@ TR equivalents: `> **⚠️ Önemli:**`, `> **Not:**`, `> **Dikkat:**`
 ```markdown
 | | |
 |---|---|
-| **Cross-device sync** | Continue conversations on any laptop |
-| **End-to-end encryption** | Files encrypted with age before upload |
+| **Zero dependencies** | Ships as a single 4 KB module |
+| **Accessible** | Every component passes WCAG 2.2 AA checks |
 ```
 
 ✅ Correct (<7 features):
 ```markdown
-- **Cross-device sync** — continue conversations on any laptop
-- **End-to-end encryption** — files encrypted with age before upload
+- **Zero dependencies** — ships as a single 4 KB module
+- **Accessible** — every component passes WCAG 2.2 AA checks
 ```
 
 ---
 
 ## Rule 20 — Value paragraph for published packages
 
-Only when the project is a published package/product (npm/NuGet/PyPI badge generated, not `private`). One paragraph, ≤4 sentences, bold one-sentence claim as opener. Placed after the TR link, before the first `---`. Rule 13 still applies — this paragraph is *in addition to* the one-line description, never instead of it.
+Only when the project is a published package/product (npm/NuGet/PyPI badge generated, not `private`). One paragraph, ≤4 sentences, bold one-sentence claim as opener. Placed after the description (and the mirror link line, if any), before the first `---`. Rule 13 still applies — this paragraph is *in addition to* the one-line description, never instead of it.
 
 ✅ Correct:
 ```markdown
-An Agent Skill that enforces a consistent README structure.
+A dependency-free library that renders accessible widgets — 12 components, 4 KB gzipped.
 
 > 🇹🇷 Türkçe için [README.tr.md](README.tr.md)
 
-**The only README tool with a built-in audit mode.** It detects your project
-type, generates badges from metadata, and keeps an exact Turkish mirror in
-sync — without you writing a single heading.
+**Accessible widgets without a framework.** Drop one 4 KB module into any page
+and get keyboard support, screen-reader labels and theming out of the box.
 
 ---
 ```
@@ -550,7 +578,7 @@ Only if visual assets exist under `assets/` (never invent or reference missing i
 
 - **Banner**: first element of a centered hero block.
 - **Demo GIF / screenshot**: centered, between Features and the section after it.
-- **Hero block** order inside `<div align="center">`: banner? → `# Name` → `### tagline` → metric line? → badges → nav line → `</div>`. The TR link stays as the first line after the hero (Rule 4 unchanged).
+- **Hero block** order inside `<div align="center">`: banner? → `# Name` → `### tagline` → metric line? → badges → nav line → `</div>`. The mirror link line, if any, stays as the first line after the hero (Rule 4 unchanged).
 - ASCII architecture diagram: optional inside How It Works, fenced code block (no language), ≤25 lines.
 
 ❌ Wrong: hero block without assets, mixed centered/uncentered header elements, diagram as an image when ASCII suffices.
@@ -571,7 +599,7 @@ Only for GitHub-hosted projects with README ≥200 lines. After License, as the 
 </div>
 ```
 
-TR mirror: `[Hata Bildir](...) · [Özellik İste](...)` (same URLs).
+Mirrors translate the link text, same URLs (Turkish: `[Hata Bildir](...) · [Özellik İste](...)`).
 
 ---
 
@@ -587,7 +615,7 @@ README.md
   ✅ Rule 1: No inline bilingual content
   ❌ Rule 2: Quick Start is not the first section (found: Features → Quick Start)
   ✅ Rule 3: Quick Start is ≤15 lines and copy-paste ready
-  ✅ Rule 4: TR reference link present and correctly formatted
+  ✅ Rule 4: Mirror link line present and correctly formatted (mirrors: tr)
   ✅ Rule 6: Code blocks not translated
   ⚠️ Rule 7: Table in "Configuration" section has bilingual columns
   ✅ Rule 8: Section heading emojis consistent (none)
@@ -600,7 +628,7 @@ Conditional sections
   ⚠️ Project installs globally (npm -g); 'Uninstall' section recommended
   ⚠️ 'Community' present but no community channel link detected
 
-README.tr.md
+README.tr.md   (configured mirror)
   ❌ File missing
 
 Summary: 3 failures, 4 warnings

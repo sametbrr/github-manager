@@ -1,65 +1,82 @@
-name: Auto Release on Version Bump
+# Release: generic project with a VERSION file
+# Trigger: a change to VERSION on __DEFAULT_BRANCH__. Then: tag v<version> if missing and create a
+# GitHub release. Notes come from the matching CHANGELOG.md section, else from the commit subjects
+# since the previous tag.
+name: Release
 
 on:
   push:
-    branches: [main]
-    paths:
-      - VERSION
+    branches: ['__DEFAULT_BRANCH__']
+    paths: [VERSION]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Read version from VERSION file
-        id: version
+      - name: Check ref
+        env:
+          DEFAULT_BRANCH: '__DEFAULT_BRANCH__'
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            COMMIT=$(git rev-parse "${GITHUB_SHA}^{commit}")
+            if ! git merge-base --is-ancestor "$COMMIT" "origin/$DEFAULT_BRANCH"; then
+              echo "::error::tag $GITHUB_REF_NAME points to a commit that is not on $DEFAULT_BRANCH"; exit 1
+            fi
+          elif [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
+            echo "::error::releases run only from $DEFAULT_BRANCH (got $GITHUB_REF_NAME)"; exit 1
+          fi
+
+      - name: Read version
+        id: v
         run: |
           RAW=$(tr -d '[:space:]' < VERSION)
-          if [[ "$RAW" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            VERSION="${RAW}.0"
+          if [ -z "$RAW" ]; then echo "::error::VERSION is empty"; exit 1; fi
+          if [[ "$RAW" =~ ^[0-9]+\.[0-9]+$ ]]; then VERSION="${RAW}.0"; else VERSION="$RAW"; fi
+          TAG="v${VERSION}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
           else
-            VERSION="$RAW"
-          fi
-          echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Detected version: v${VERSION}"
-
-      - name: Check if tag already exists
-        id: tag_check
-        run: |
-          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Generate release notes from git log
-        if: steps.tag_check.outputs.exists == 'false'
-        id: notes
+      - name: Write release notes
+        if: steps.v.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            LOG=$(git log --oneline | head -20)
-          else
-            LOG=$(git log "${PREV_TAG}..HEAD" --oneline)
+          NOTES="$RUNNER_TEMP/notes.md"
+          : > "$NOTES"
+          if [ -f CHANGELOG.md ]; then
+            awk -v v="$VERSION" '
+              /^## / { if (found) exit; h = $0; sub(/^##[ \t]+/, "", h); gsub(/[][]/, "", h); sub(/^v/, "", h); split(h, w, /[ \t]/); if (w[1] == v) { found = 1; next } }
+              found { print }' CHANGELOG.md > "$NOTES"
           fi
-          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$LOG" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          if [ ! -s "$NOTES" ]; then
+            PREV=$(git describe --tags --abbrev=0 2>/dev/null || true)
+            if [ -n "$PREV" ]; then git log --pretty='- %s' "${PREV}..HEAD" > "$NOTES"; else git log --pretty='- %s' -20 > "$NOTES"; fi
+          fi
 
       - name: Create tag and release
-        if: steps.tag_check.outputs.exists == 'false'
+        if: steps.v.outputs.release == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
         run: |
-          TAG="${{ steps.version.outputs.version }}"
           git tag "$TAG"
           git push origin "$TAG"
-          gh release create "$TAG" \
-            --title "$TAG" \
-            --notes "${{ steps.notes.outputs.notes }}"
+          gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag

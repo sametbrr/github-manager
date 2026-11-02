@@ -1,0 +1,25 @@
+{
+  "name": "github-manager",
+  "version": "1.0.0",
+  "description": "Audit and strengthen any GitHub account: profile fields, profile README, repo descriptions, topics, license, project READMEs and release workflows. Read-only audit first, every write confirmed.",
+  "author": { "name": "sametbrr", "email": "sametbrr@gmail.com", "url": "https://github.com/sametbrr" },
+  "homepage": "https://github.com/sametbrr/github-manager",
+  "repository": "https://github.com/sametbrr/github-manager",
+  "license": "MIT",
+  "keywords": ["github", "github-profile", "readme", "repository-metadata", "release-automation", "agent-skills", "claude-code", "codex"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "GitHub Manager",
+    "shortDescription": "Audit and strengthen your GitHub repos and profile",
+    "longDescription": "Runs a read-only health audit of a GitHub account or a single repo (profile fields, profile README, descriptions, topics, license, README structure), then fixes what you approve: account fields, a generated or hand-written profile README, repo metadata, standardized project READMEs with optional translated mirrors, and tag-driven release workflows for npm, NuGet, PyPI, Go, MCP servers and agent plugins. Preferences live in one config file shared by Claude Code and Codex.",
+    "developerName": "sametbrr",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Audit my public GitHub repos",
+      "Audit the README in this repo",
+      "Check my GitHub profile and repo descriptions"
+    ],
+    "websiteURL": "https://github.com/sametbrr/github-manager"
+  }
+}

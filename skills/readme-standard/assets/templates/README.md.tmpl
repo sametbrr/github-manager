@@ -9,7 +9,9 @@
 
 {{ONE_LINE_DESCRIPTION}}
 
+{{MIRROR_LINK_LINE — include only if readme.mirrors is non-empty (Rule 4), e.g.:
 > 🇹🇷 Türkçe için [README.tr.md](README.tr.md)
+}}
 
 {{VALUE_PARAGRAPH — include only if published package/product (Rule 20), ≤4 sentences:
 **{{One-sentence claim in bold.}}** {{What it does differently, who it is for — 2–3 sentences.}}
@@ -99,6 +101,8 @@ Table form (≥7 features):
 |---|---|---|
 | `field` | `value` | what it does |
 
+---
+
 }}
 
 {{HOW_IT_WORKS_SECTION — include only if internal mechanics are non-obvious:
@@ -109,6 +113,8 @@ Table form (≥7 features):
 3. Step three
 
 Optional ASCII architecture diagram (Rule 22) — fenced code block, no language, ≤25 lines.
+
+---
 
 }}
 
@@ -121,6 +127,8 @@ project/
 └── component-b/    → description
 ```
 
+---
+
 }}
 
 {{LIMITATIONS_SECTION — include only if known user-facing constraints exist (Rule 15):
@@ -129,6 +137,8 @@ project/
 {{Constraint — what it is and why it exists, 1–2 sentences.}}
 
 **Workaround:** {{how the user avoids or mitigates it}}
+
+---
 
 }}
 
@@ -139,6 +149,13 @@ project/
 
 **{{Symptom 2}}** — {{solution}}.
 
+---
+
+}}
+
+{{PROJECT_SPECIFIC_SECTIONS — optional slot (Rule 10): names from readme.extraSections or clearly
+project-specific content such as API, MCP Tools, Deployment, Environment Variables. Each is a
+normal `##` section followed by `---` (Rule 12). Omit the slot entirely when there is nothing to add.
 }}
 
 {{CONTRIBUTING_SECTION — include only if contributions are accepted:
@@ -152,6 +169,8 @@ cd {{repo}}
 
 {{PR process — one or two sentences, link CONTRIBUTING.md if it exists.}}
 
+---
+
 }}
 
 {{COMMUNITY_SECTION — include only if community channels exist:
@@ -159,6 +178,8 @@ cd {{repo}}
 
 - [{{Channel name}}]({{url}})
 - [Issues]({{repo-url}}/issues)
+
+---
 
 }}
 
@@ -171,11 +192,13 @@ Full documentation: **[{{docs-url}}]({{docs-url}})**
 |---|---|
 | [{{Page}}]({{url}}) | {{what it covers}} |
 
+---
+
 }}
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+{{SPDX_ID}} — see [{{LICENSE_FILE}}]({{LICENSE_FILE}}).
 
 {{FOOTER — include only if GitHub repo and README ≥200 lines (Rule 23):
 ---

@@ -1,0 +1,49 @@
+# Release: Go project with GoReleaser (.goreleaser.yaml in the repo)
+# Trigger: push a tag v<version> (`git tag v1.2.3 && git push origin v1.2.3`).
+# Then: test and run `goreleaser release --clean`, which builds, archives and creates the GitHub
+# release with its own changelog. Extra publishers (Homebrew, npm, Docker) come from
+# .goreleaser.yaml and their own secrets.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check ref
+        env:
+          DEFAULT_BRANCH: '__DEFAULT_BRANCH__'
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            COMMIT=$(git rev-parse "${GITHUB_SHA}^{commit}")
+            if ! git merge-base --is-ancestor "$COMMIT" "origin/$DEFAULT_BRANCH"; then
+              echo "::error::tag $GITHUB_REF_NAME points to a commit that is not on $DEFAULT_BRANCH"; exit 1
+            fi
+          elif [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
+            echo "::error::releases run only from $DEFAULT_BRANCH (got $GITHUB_REF_NAME)"; exit 1
+          fi
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go test ./...
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

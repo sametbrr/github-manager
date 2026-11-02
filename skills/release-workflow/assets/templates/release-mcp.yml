@@ -1,0 +1,137 @@
+# Release: MCP server published to npm (+ the official MCP Registry when server.json exists)
+# Triggers: a version bump in package.json on __DEFAULT_BRANCH__ (the tag v<version> is created
+# if missing), or a tag v<version> you push yourself (`npm version patch && git push --follow-tags`).
+# Then: test, publish to npm with provenance, create a GitHub release with generated notes.
+# Auth: an NPM_TOKEN secret, or npm trusted publishing (configure the repo on npmjs.com and
+# leave NPM_TOKEN unset). `--provenance` needs a public repo; remove it for private repos.
+# Packages with "private": true are tagged and released on GitHub but never published.
+# MCP Registry: keep a server.json (https://github.com/modelcontextprotocol/registry) and add
+# "mcpName" to package.json; the registry step logs in with GitHub OIDC, no secret needed.
+name: Release
+
+on:
+  push:
+    branches: ['__DEFAULT_BRANCH__']
+    tags: ['v*']
+    paths: [package.json]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check ref
+        env:
+          DEFAULT_BRANCH: '__DEFAULT_BRANCH__'
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            COMMIT=$(git rev-parse "${GITHUB_SHA}^{commit}")
+            if ! git merge-base --is-ancestor "$COMMIT" "origin/$DEFAULT_BRANCH"; then
+              echo "::error::tag $GITHUB_REF_NAME points to a commit that is not on $DEFAULT_BRANCH"; exit 1
+            fi
+          elif [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
+            echo "::error::releases run only from $DEFAULT_BRANCH (got $GITHUB_REF_NAME)"; exit 1
+          fi
+
+      - name: Resolve version
+        id: v
+        run: |
+          VERSION=$(jq -r '.version // empty' package.json)
+          if [ -z "$VERSION" ]; then echo "::error::package.json has no version"; exit 1; fi
+          TAG="v${VERSION}"
+          {
+            echo "version=$VERSION"
+            echo "tag=$TAG"
+            echo "private=$(jq -r '.private // false' package.json)"
+          } >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            if [ "$GITHUB_REF_NAME" != "$TAG" ]; then
+              echo "::error::tag $GITHUB_REF_NAME does not match package.json version $VERSION"; exit 1
+            fi
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          elif git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "create_tag=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag
+        if: steps.v.outputs.create_tag == 'true'
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - uses: actions/setup-node@v5
+        if: steps.v.outputs.release == 'true'
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+
+      - name: Install and test
+        if: steps.v.outputs.release == 'true'
+        run: |
+          PM=npm
+          [ -f pnpm-lock.yaml ] && PM=pnpm
+          [ -f yarn.lock ] && PM=yarn
+          case "$PM" in
+            pnpm) corepack enable && pnpm install --frozen-lockfile ;;
+            yarn) corepack enable && yarn install ;;
+            npm)  if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then npm ci; else npm install --no-audit --no-fund; fi ;;
+          esac
+          TEST=$(jq -r '.scripts.test // "" | select(test("no test specified") | not)' package.json)
+          if [ -n "$TEST" ]; then "$PM" test; fi
+
+      - name: Publish to npm
+        if: steps.v.outputs.release == 'true' && steps.v.outputs.private != 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          NAME=$(jq -r '.name' package.json)
+          if npm view "${NAME}@${VERSION}" version >/dev/null 2>&1; then
+            echo "${NAME}@${VERSION} is already on npm; skipping publish."
+            exit 0
+          fi
+          npm publish --provenance --access public
+
+      - name: Publish to the MCP Registry
+        if: steps.v.outputs.release == 'true' && steps.v.outputs.private != 'true' && hashFiles('server.json') != ''
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          # Pinned mcp-publisher release and its SHA-256 (from registry_<ver>_checksums.txt).
+          # To upgrade, change both values together.
+          MCP_PUBLISHER_VERSION: v1.8.7
+          MCP_PUBLISHER_SHA256: 00b21004149a4ce66f0782508ae4a2bce67d1bea395a8da0bd8028159fb59579
+        run: |
+          jq --arg v "$VERSION" '.version = $v | if .packages then .packages |= map(.version = $v) else . end' server.json > server.json.tmp
+          mv server.json.tmp server.json
+          curl -fsSLo mcp-publisher.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
+          echo "${MCP_PUBLISHER_SHA256}  mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
+
+      - name: Create GitHub release
+        if: steps.v.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "Release $TAG already exists."; exit 0; fi
+          gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag

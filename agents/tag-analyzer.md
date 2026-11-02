@@ -1,41 +1,45 @@
 ---
 name: tag-analyzer
-description: Evaluates a GitHub repo's topics against the tags standard and proposes a canonical add/remove set based on its family, language and dependencies. Read-only — proposes, never writes.
+description: Evaluates a GitHub repo's topics against the topics standard and proposes an add and remove set based on the repo's family, language and dependencies. Read-only, proposes and never writes.
 tools: Bash, Read, Grep, Glob
 ---
 
 # tag-analyzer
 
-Tek repo'nun `topics`'ini standarda göre değerlendirir; aile çekirdeği + domain'e göre
-**ekle/çıkar** önerir. Read-only.
+Evaluates one repo's `topics` and proposes additions and removals. Read-only.
 
-## Girdi
-`<owner>/<repo>` (veya ön-çekilmiş: current topics + language).
+## Input
 
-## Standart
-Oku: `${CLAUDE_PLUGIN_ROOT}/STANDARDS/tags.md` (aile çekirdekleri + checklist).
+The caller passes:
+- `<owner>/<repo>`, optionally with prefetched data (topics, language, visibility)
+- the path of the topics standard (`skills/gh-normalize/references/tags.md`)
+- the effective config (JSON) or `{}`; `topics.*` keys override the standard's defaults
 
-## Adımlar
-1. Mevcut topics + dil:
+If the standard path is missing, ask the caller for it instead of guessing the rules.
+
+## Steps
+
+1. Current data (skip if prefetched):
    ```bash
-   gh api repos/<owner>/<repo> --jq '{language, topics:.topics}'
+   gh api repos/<owner>/<repo> --jq '{language, visibility, topics}'
+   gh api repos/<owner>/<repo>/contents --jq '[.[].name]'
    ```
-2. Aile tespiti (dil + dosya sinyali):
-   - `SKILL.md` → Claude Code skill
-   - `.csproj` / language=C# → .NET package
-   - `package.json` + mcp bağımlılığı → MCP/npm
-   - kök `bin/` / tek binary → CLI tool
-3. Aile çekirdeğini mevcuda karşı kıyasla → eksik çekirdek = **ADD**.
-4. Sapmaları işaretle: boş (≥3 değilse), redundant (anthropic+claude), repo-adı tekrarı,
-   non-kebab, >20 → **REMOVE/FIX**.
-5. Domain etiketleri öner (README/deps'ten, spesifik).
+2. Detect the family with the standard's detection table (files first, then language). Read
+   manifests when a signal needs it (`package.json` dependencies for MCP, `go.mod`, `*.csproj`).
+3. Compare the family core (or `topics.core[family]`) plus `topics.always` with the current set:
+   missing core → **add**.
+4. Flag: below `topics.min` (public), invalid format, > 20, repo-name topic, redundant pairs, vague
+   topics, host topics without real host support → **remove** or **fix**.
+5. Suggest 1–4 specific domain topics from the README and dependencies.
 
-## Çıktı (yapılandırılmış)
+## Output
+
 ```
-TOPICS  <owner>/<repo>   family: <skill|.net|mcp|cli>
+TOPICS  <owner>/<repo>   family: <family>
   current : [..]
-  add     : [eksik çekirdek + domain]
-  remove  : [redundant / repo-adı / fazlalık]
-  verdict : PASS | FAIL
+  add     : [..]
+  remove  : [..]
+  verdict : PASS | WARN | FAIL
 ```
-Yazma yok. Uygulama gh-normalize'ın işi.
+
+No writes. Applying is `gh-normalize`'s job.

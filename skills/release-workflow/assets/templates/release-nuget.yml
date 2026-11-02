@@ -1,66 +1,112 @@
-name: Auto Release on Version Bump
+# Release: NuGet package
+# Triggers: a <Version> bump in __CSPROJ__ (or Directory.Build.props) on __DEFAULT_BRANCH__ (the
+# tag v<version> is created if missing), or a tag v<version> you push yourself.
+# Then: build, test, pack, push to nuget.org, create a GitHub release with generated notes.
+# Auth: a NUGET_API_KEY secret (nuget.org → API keys, scope "Push").
+name: Release
 
 on:
   push:
-    branches: [main]
-    paths:
-      - '**/*.csproj'
+    branches: ['__DEFAULT_BRANCH__']
+    tags: ['v*']
+    paths: ['**/*.csproj', 'Directory.Build.props']
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  PROJECT: '__CSPROJ__'
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Read version from .csproj
-        id: version
-        run: |
-          CSPROJ=$(find . -maxdepth 3 -name '*.csproj' | head -1)
-          RAW=$(grep -m1 -oE '<Version>[^<]+</Version>' "$CSPROJ" | sed -E 's#</?Version>##g')
-          if [[ "$RAW" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            VERSION="${RAW}.0"
-          else
-            VERSION="$RAW"
-          fi
-          echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Detected version: v${VERSION}"
-
-      - name: Check if tag already exists
-        id: tag_check
-        run: |
-          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Generate release notes from git log
-        if: steps.tag_check.outputs.exists == 'false'
-        id: notes
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            LOG=$(git log --oneline | head -20)
-          else
-            LOG=$(git log "${PREV_TAG}..HEAD" --oneline)
-          fi
-          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$LOG" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-      - name: Create tag and release
-        if: steps.tag_check.outputs.exists == 'false'
+      - name: Check ref
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: '__DEFAULT_BRANCH__'
         run: |
-          TAG="${{ steps.version.outputs.version }}"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            COMMIT=$(git rev-parse "${GITHUB_SHA}^{commit}")
+            if ! git merge-base --is-ancestor "$COMMIT" "origin/$DEFAULT_BRANCH"; then
+              echo "::error::tag $GITHUB_REF_NAME points to a commit that is not on $DEFAULT_BRANCH"; exit 1
+            fi
+          elif [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
+            echo "::error::releases run only from $DEFAULT_BRANCH (got $GITHUB_REF_NAME)"; exit 1
+          fi
+
+      - name: Resolve version
+        id: v
+        run: |
+          VERSION=$(sed -n 's:.*<Version>[[:space:]]*\([^<[:space:]]*\)[[:space:]]*</Version>.*:\1:p' "$PROJECT" | head -1)
+          if [ -z "$VERSION" ] && [ -f Directory.Build.props ]; then
+            VERSION=$(sed -n 's:.*<Version>[[:space:]]*\([^<[:space:]]*\)[[:space:]]*</Version>.*:\1:p' Directory.Build.props | head -1)
+          fi
+          if [ -z "$VERSION" ]; then echo "::error::no <Version> in $PROJECT or Directory.Build.props"; exit 1; fi
+          TAG="v${VERSION}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            if [ "$GITHUB_REF_NAME" != "$TAG" ]; then
+              echo "::error::tag $GITHUB_REF_NAME does not match project version $VERSION"; exit 1
+            fi
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          elif git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "create_tag=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag
+        if: steps.v.outputs.create_tag == 'true'
+        env:
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
           git tag "$TAG"
           git push origin "$TAG"
-          gh release create "$TAG" \
-            --title "$TAG" \
-            --notes "${{ steps.notes.outputs.notes }}"
+
+      - uses: actions/setup-dotnet@v4
+        if: steps.v.outputs.release == 'true'
+        with:
+          dotnet-version: '__DOTNET_VERSION__'
+
+      - name: Test
+        if: steps.v.outputs.release == 'true'
+        run: |
+          find . -name '*Tests.csproj' -o -name '*Test.csproj' | while read -r p; do
+            dotnet test "$p" -c Release
+          done
+
+      - name: Pack
+        if: steps.v.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: dotnet pack "$PROJECT" -c Release -o out -p:Version="$VERSION"
+
+      - name: Push to nuget.org
+        if: steps.v.outputs.release == 'true'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then echo "::error::NUGET_API_KEY secret is not set"; exit 1; fi
+          dotnet nuget push "out/*.nupkg" --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Create GitHub release
+        if: steps.v.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "Release $TAG already exists."; exit 0; fi
+          gh release create "$TAG" out/*.nupkg --title "$TAG" --generate-notes --verify-tag
